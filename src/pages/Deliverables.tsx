@@ -173,71 +173,68 @@ const Deliverables: React.FC = () => {
           ))}
         </select>
       </div>
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-xl font-bold text-gray-900">Deliverables List</h3>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {filteredDeliverables.length === 0 ? (
-            <div className="py-16 flex flex-col items-center gap-2 text-gray-400">
-              <Upload className="w-10 h-10 text-primary-300 mb-2" />
-              <span className="text-lg font-semibold">No deliverables found</span>
-              <span className="text-sm">Try adjusting your search or upload a new deliverable.</span>
-            </div>
-          ) : (
-            filteredDeliverables.map((deliverable) => (
-              <div key={deliverable.id} className="p-6 hover:bg-primary-50 transition-colors flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center mb-2">
-                    {getStatusIcon(deliverable.status)}
-                    <h4 className="text-lg font-medium text-gray-900 ml-2">{deliverable.title}</h4>
-                    <span className={`ml-3 px-2 py-1 text-xs font-bold rounded-full ${getStatusColor(deliverable.status)}`}>{deliverable.status}</span>
-                  </div>
-                  <p className="text-gray-600 mb-3">{deliverable.description}</p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Due: {new Date(deliverable.dueDate).toLocaleDateString()}
-                      {isOverdue(deliverable.dueDate) && (
-                        <span className="ml-2 text-red-600 font-medium">(Overdue)</span>
-                      )}
-                    </div>
-                    <div className="flex items-center">
-                      <span className="mr-2">Project:</span>
-                      {getProjectName(deliverable.projectId)}
-                    </div>
-                    {deliverable.uploadedAt && (
-                      <div className="flex items-center">
-                        <Upload className="h-4 w-4 mr-2" />
-                        Uploaded: {new Date(deliverable.uploadedAt).toLocaleDateString()}
-                      </div>
-                    )}
-                  </div>
+      {/* Deliverables Card Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+        {filteredDeliverables.length === 0 ? (
+          <div className="col-span-full py-16 flex flex-col items-center gap-2 text-gray-400">
+            <Upload className="w-10 h-10 text-primary-300 mb-2" />
+            <span className="text-lg font-semibold">No deliverables found</span>
+            <span className="text-sm">Try adjusting your search or upload a new deliverable.</span>
+          </div>
+        ) : (
+          filteredDeliverables.map((deliverable, idx) => {
+            const gradients = [
+              'from-green-100 via-green-200 to-green-300',
+              'from-blue-100 via-blue-200 to-blue-300',
+              'from-red-100 via-red-200 to-red-300', // changed from yellow to light red
+              'from-pink-100 via-pink-200 to-pink-300',
+              'from-purple-100 via-purple-200 to-purple-300',
+              'from-indigo-100 via-indigo-200 to-indigo-300',
+              'from-teal-100 via-teal-200 to-teal-300',
+              'from-orange-100 via-orange-200 to-orange-300',
+            ];
+            const gradient = gradients[idx % gradients.length];
+            return (
+              <div
+                key={deliverable.id}
+                className={`bg-gradient-to-br ${gradient} dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-3xl shadow-xl p-6 flex flex-col gap-4 items-center hover:scale-105 hover:shadow-2xl transition-all duration-300 animate-fade-in border-b-8 border-primary-200`}
+              >
+                <div className="flex items-center gap-2 w-full justify-between">
+                  {getStatusIcon(deliverable.status)}
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ml-2 ${getStatusColor(deliverable.status)}`}>{deliverable.status}</span>
                 </div>
-                <div className="flex items-center space-x-2 ml-4">
-                  {deliverable.fileUrl ? (
-                    <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors">
-                      <Download className="h-4 w-4" />
-                    </button>
-                  ) : (
-                    <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
-                      <Upload className="h-4 w-4" />
-                    </button>
+                <div className="text-xl font-extrabold text-primary-700 dark:text-primary-300 text-center w-full truncate">{deliverable.title}</div>
+                <div className="text-sm text-gray-700 dark:text-gray-200 w-full text-center mb-2">{deliverable.description}</div>
+                <div className="w-full flex items-center gap-2 justify-center">
+                  <Calendar className="h-4 w-4 text-primary-400" />
+                  <span className="font-bold">Due:</span> {new Date(deliverable.dueDate).toLocaleDateString()}
+                  {isOverdue(deliverable.dueDate) && (
+                    <span className="ml-2 text-red-600 font-medium animate-pulse">(Overdue)</span>
                   )}
-                  <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
-                    <Edit className="h-4 w-4" />
-                  </button>
-                  <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                </div>
+                <div className="w-full flex items-center gap-2 justify-center">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Project:</span>
+                  <span className="font-semibold text-primary-700 dark:text-primary-300">{getProjectName(deliverable.projectId)}</span>
+                </div>
+                {deliverable.uploadedAt && (
+                  <div className="w-full flex items-center gap-2 justify-center text-xs text-gray-500 dark:text-gray-400">
+                    <Upload className="h-4 w-4" /> Uploaded: {new Date(deliverable.uploadedAt).toLocaleDateString()}
+                  </div>
+                )}
+                <div className="flex gap-2 mt-2 w-full justify-center">
+                  {deliverable.fileUrl ? (
+                    <button className="p-2 bg-green-500 text-white rounded-full shadow hover:bg-green-600 transition" title="Download"><Download className="h-4 w-4" /></button>
+                  ) : (
+                    <button className="p-2 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition" title="Upload"><Upload className="h-4 w-4" /></button>
+                  )}
+                  <button className="p-2 bg-primary-500 text-white rounded-full shadow hover:bg-primary-600 transition" title="View"><Eye className="h-4 w-4" /></button>
+                  <button className="p-2 bg-yellow-500 text-white rounded-full shadow hover:bg-yellow-600 transition" title="Edit"><Edit className="h-4 w-4" /></button>
+                  <button className="p-2 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition" title="Delete"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

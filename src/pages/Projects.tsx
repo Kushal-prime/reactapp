@@ -128,46 +128,58 @@ const ProjectsPage: React.FC = () => {
           className="border border-gray-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
-      <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded shadow">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm">
-          <thead className="bg-gray-50 dark:bg-gray-800">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Progress</th>
-              <th className="px-6 py-3 text-right text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
-            {filteredProjects.map((project, idx) => (
-              <tr key={project.id} className={`transition-colors ${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'} hover:bg-primary-50 dark:hover:bg-primary-900`}>
-                <td className="px-6 py-4 whitespace-nowrap font-extrabold text-lg text-primary-700 dark:text-primary-300">{project.title}</td>
-                <td className="px-6 py-4 whitespace-nowrap capitalize">
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold shadow-sm ${getStatusBadge(project.status)}`}>{project.status}</span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="w-28 bg-primary-100 dark:bg-primary-900 rounded-full h-4">
-                    <div
-                      className={`h-4 rounded-full ${project.progress === 100 ? 'bg-green-500' : 'bg-primary-500'} transition-all duration-700`}
+      {/* Projects Card Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {filteredProjects.map((project, idx) => {
+          const gradients = [
+            'from-pink-100 via-pink-200 to-pink-300',
+            'from-blue-100 via-blue-200 to-blue-300',
+            'from-green-100 via-green-200 to-green-300',
+            'from-red-100 via-red-200 to-red-300', // changed from yellow to light red
+            'from-purple-100 via-purple-200 to-purple-300',
+            'from-indigo-100 via-indigo-200 to-indigo-300',
+            'from-teal-100 via-teal-200 to-teal-300',
+            'from-orange-100 via-orange-200 to-orange-300',
+          ];
+          const gradient = gradients[idx % gradients.length];
+          const statusIcons = {
+            active: '🟢',
+            completed: '✅',
+            'on-hold': '⏸️',
+            cancelled: '❌',
+          };
+          return (
+            <div
+              key={project.id}
+              className={`bg-gradient-to-br ${gradient} dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-3xl shadow-xl p-6 flex flex-col gap-4 items-center hover:scale-105 hover:shadow-2xl transition-all duration-300 animate-fade-in border-b-8 border-primary-200`}
+            >
+              <div className="flex items-center gap-2 w-full justify-between">
+                <span className="text-2xl">{statusIcons[project.status]}</span>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${getStatusBadge(project.status)}`}>{project.status}</span>
+              </div>
+              <div className="text-2xl font-extrabold text-primary-700 dark:text-primary-300 text-center w-full truncate">{project.title}</div>
+              <div className="w-full flex items-center gap-2">
+                <div className="flex-1 h-3 bg-white/40 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div
+                    className={`h-3 rounded-full ${project.progress === 100 ? 'bg-green-500' : 'bg-primary-500'} transition-all duration-700 animate-pulse`}
                       style={{ width: `${project.progress}%` }}
                     />
                   </div>
-                  <span className="ml-2 text-base font-semibold text-primary-700 dark:text-primary-300">{project.progress}%</span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                  <button onClick={() => handleView(project)} className="text-blue-500 hover:text-blue-700" title="View"><Eye className="inline w-6 h-6" /></button>
-                  <button onClick={() => handleEdit(project)} className="text-green-500 hover:text-green-700" title="Edit"><Edit className="inline w-6 h-6" /></button>
-                </td>
-              </tr>
-            ))}
-            {filteredProjects.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-gray-400">No projects found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                <span className="text-xs font-bold text-primary-700 dark:text-primary-300">{project.progress}%</span>
+              </div>
+              <div className="text-sm text-gray-700 dark:text-gray-200 w-full text-center">{project.client}</div>
+              <div className="flex gap-2 mt-2 w-full justify-center">
+                <button onClick={() => handleView(project)} className="p-2 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition" title="View">👁️</button>
+                <button onClick={() => handleEdit(project)} className="p-2 bg-green-500 text-white rounded-full shadow hover:bg-green-600 transition" title="Edit">✏️</button>
+                <button onClick={() => handleDelete(project.id)} className="p-2 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition" title="Delete">🗑️</button>
+              </div>
+            </div>
+          );
+        })}
       </div>
+      {filteredProjects.length === 0 && (
+        <div className="text-center py-8 text-gray-400 text-xl">No projects found. <span>😢</span></div>
+      )}
       {showModal && (
         <ProjectModal
           mode={modalMode}
