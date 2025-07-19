@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
@@ -182,59 +182,108 @@ const Deliverables: React.FC = () => {
             <span className="text-sm">Try adjusting your search or upload a new deliverable.</span>
           </div>
         ) : (
-          filteredDeliverables.map((deliverable, idx) => {
-            const gradients = [
-              'from-green-100 via-green-200 to-green-300',
-              'from-blue-100 via-blue-200 to-blue-300',
-              'from-red-100 via-red-200 to-red-300', // changed from yellow to light red
-              'from-pink-100 via-pink-200 to-pink-300',
-              'from-purple-100 via-purple-200 to-purple-300',
-              'from-indigo-100 via-indigo-200 to-indigo-300',
-              'from-teal-100 via-teal-200 to-teal-300',
-              'from-orange-100 via-orange-200 to-orange-300',
-            ];
-            const gradient = gradients[idx % gradients.length];
-            return (
-              <div
-                key={deliverable.id}
-                className={`bg-gradient-to-br ${gradient} dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-3xl shadow-xl p-6 flex flex-col gap-4 items-center hover:scale-105 hover:shadow-2xl transition-all duration-300 animate-fade-in border-b-8 border-primary-200`}
-              >
-                <div className="flex items-center gap-2 w-full justify-between">
-                  {getStatusIcon(deliverable.status)}
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ml-2 ${getStatusColor(deliverable.status)}`}>{deliverable.status}</span>
-                </div>
-                <div className="text-xl font-extrabold text-primary-700 dark:text-primary-300 text-center w-full truncate">{deliverable.title}</div>
-                <div className="text-sm text-gray-700 dark:text-gray-200 w-full text-center mb-2">{deliverable.description}</div>
-                <div className="w-full flex items-center gap-2 justify-center">
-                  <Calendar className="h-4 w-4 text-primary-400" />
-                  <span className="font-bold">Due:</span> {new Date(deliverable.dueDate).toLocaleDateString()}
-                  {isOverdue(deliverable.dueDate) && (
-                    <span className="ml-2 text-red-600 font-medium animate-pulse">(Overdue)</span>
-                  )}
-                </div>
-                <div className="w-full flex items-center gap-2 justify-center">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">Project:</span>
-                  <span className="font-semibold text-primary-700 dark:text-primary-300">{getProjectName(deliverable.projectId)}</span>
-                </div>
-                {deliverable.uploadedAt && (
-                  <div className="w-full flex items-center gap-2 justify-center text-xs text-gray-500 dark:text-gray-400">
-                    <Upload className="h-4 w-4" /> Uploaded: {new Date(deliverable.uploadedAt).toLocaleDateString()}
-                  </div>
-                )}
-                <div className="flex gap-2 mt-2 w-full justify-center">
-                  {deliverable.fileUrl ? (
-                    <button className="p-2 bg-green-500 text-white rounded-full shadow hover:bg-green-600 transition" title="Download"><Download className="h-4 w-4" /></button>
-                  ) : (
-                    <button className="p-2 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition" title="Upload"><Upload className="h-4 w-4" /></button>
-                  )}
-                  <button className="p-2 bg-primary-500 text-white rounded-full shadow hover:bg-primary-600 transition" title="View"><Eye className="h-4 w-4" /></button>
-                  <button className="p-2 bg-yellow-500 text-white rounded-full shadow hover:bg-yellow-600 transition" title="Edit"><Edit className="h-4 w-4" /></button>
-                  <button className="p-2 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition" title="Delete"><Trash2 className="h-4 w-4" /></button>
-                </div>
-              </div>
-            );
-          })
+          filteredDeliverables.map((deliverable, idx) => (
+            <DeliverableCard key={deliverable.id} deliverable={deliverable} idx={idx} getProjectName={getProjectName} isOverdue={isOverdue} />
+          ))
         )}
+      </div>
+    </div>
+  );
+};
+
+// Animated Deliverable Card
+const DeliverableCard: React.FC<{ deliverable: Deliverable; idx: number; getProjectName: (id: string) => string; isOverdue: (date: string) => boolean }> = ({ deliverable, idx, getProjectName, isOverdue }) => {
+  const [show, setShow] = useState(false);
+  const [titleDisplay, setTitleDisplay] = useState('');
+  useEffect(() => {
+    const timeout = setTimeout(() => setShow(true), idx * 120);
+    return () => clearTimeout(timeout);
+  }, [idx]);
+  useEffect(() => {
+    if (show && titleDisplay.length < deliverable.title.length) {
+      const timeout = setTimeout(() => {
+        setTitleDisplay(deliverable.title.slice(0, titleDisplay.length + 1));
+      }, 20);
+      return () => clearTimeout(timeout);
+    }
+  }, [show, titleDisplay, deliverable.title]);
+  const gradients = [
+    'from-green-100 via-green-200 to-green-300',
+    'from-blue-100 via-blue-200 to-blue-300',
+    'from-red-100 via-red-200 to-red-300',
+    'from-pink-100 via-pink-200 to-pink-300',
+    'from-purple-100 via-purple-200 to-purple-300',
+    'from-indigo-100 via-indigo-200 to-indigo-300',
+    'from-teal-100 via-teal-200 to-teal-300',
+    'from-orange-100 via-orange-200 to-orange-300',
+  ];
+  const gradient = gradients[idx % gradients.length];
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'in-progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'overdue':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="h-5 w-5 text-green-500 animate-pop-in" />;
+      case 'in-progress':
+        return <Clock className="h-5 w-5 text-blue-500 animate-pop-in" />;
+      case 'pending':
+        return <AlertCircle className="h-5 w-5 text-yellow-500 animate-pop-in" />;
+      case 'overdue':
+        return <XCircle className="h-5 w-5 text-red-500 animate-pop-in" />;
+      default:
+        return <Clock className="h-5 w-5 text-gray-500 animate-pop-in" />;
+    }
+  };
+  return (
+    <div
+      className={`bg-gradient-to-br ${gradient} dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-3xl shadow-xl p-6 flex flex-col gap-4 items-center border-b-8 border-primary-200 transition-all duration-300 ${show ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'} hover:scale-110 hover:shadow-2xl hover:shadow-primary-200 dark:hover:shadow-primary-900 animate-pop-in`}
+      style={{ transitionDelay: `${idx * 80}ms` }}
+    >
+      <div className="flex items-center gap-2 w-full justify-between">
+        {getStatusIcon(deliverable.status)}
+        <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ml-2 ${getStatusColor(deliverable.status)} animate-fade-in`}>{deliverable.status}</span>
+      </div>
+      <div className="text-xl font-extrabold text-primary-700 dark:text-primary-300 text-center w-full truncate animate-fade-in-up">
+        {titleDisplay}<span className="w-1 h-6 bg-primary-400 inline-block ml-1 align-middle animate-blink rounded" />
+      </div>
+      <div className="text-sm text-gray-700 dark:text-gray-200 w-full text-center mb-2 animate-fade-in-up">{deliverable.description}</div>
+      <div className="w-full flex items-center gap-2 justify-center animate-fade-in-up">
+        <Calendar className="h-4 w-4 text-primary-400" />
+        <span className="font-bold">Due:</span> {new Date(deliverable.dueDate).toLocaleDateString()}
+        {isOverdue(deliverable.dueDate) && (
+          <span className="ml-2 text-red-600 font-medium animate-pulse">(Overdue)</span>
+        )}
+      </div>
+      <div className="w-full flex items-center gap-2 justify-center animate-fade-in-up">
+        <span className="text-xs text-gray-500 dark:text-gray-400">Project:</span>
+        <span className="font-semibold text-primary-700 dark:text-primary-300 animate-pop-in">{getProjectName(deliverable.projectId)}</span>
+      </div>
+      {deliverable.uploadedAt && (
+        <div className="w-full flex items-center gap-2 justify-center text-xs text-gray-500 dark:text-gray-400 animate-fade-in-up">
+          <Upload className="h-4 w-4" /> Uploaded: {new Date(deliverable.uploadedAt).toLocaleDateString()}
+        </div>
+      )}
+      <div className="flex gap-2 mt-2 w-full justify-center">
+        {deliverable.fileUrl ? (
+          <button className="p-2 bg-green-500 text-white rounded-full shadow hover:bg-green-600 transition animate-pop-in" title="Download"><Download className="h-4 w-4" /></button>
+        ) : (
+          <button className="p-2 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition animate-pop-in" title="Upload"><Upload className="h-4 w-4" /></button>
+        )}
+        <button className="p-2 bg-primary-500 text-white rounded-full shadow hover:bg-primary-600 transition animate-pop-in" title="View"><Eye className="h-4 w-4" /></button>
+        <button className="p-2 bg-yellow-500 text-white rounded-full shadow hover:bg-yellow-600 transition animate-pop-in" title="Edit"><Edit className="h-4 w-4" /></button>
+        <button className="p-2 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition animate-pop-in" title="Delete"><Trash2 className="h-4 w-4" /></button>
       </div>
     </div>
   );

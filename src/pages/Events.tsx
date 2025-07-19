@@ -15,6 +15,8 @@ import {
 import { Event } from '../types';
 import { useToast } from '../components/Layout/Layout';
 import { useEffect } from 'react';
+import { useSpring, animated } from 'react-spring';
+import Confetti from 'react-confetti';
 
 const Events: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([
@@ -99,6 +101,7 @@ const Events: React.FC = () => {
   const [filterType, setFilterType] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const showToast = useToast();
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Add modal state for new event
   const [newEvent, setNewEvent] = useState({
@@ -147,6 +150,8 @@ const Events: React.FC = () => {
       },
     ]);
     setShowCreateModal(false);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2500);
     setNewEvent({
       title: '', description: '', type: 'webinar', date: '', time: '', duration: '', provider: { id: '', name: '', email: '' }, location: '', online: true, maxParticipants: 0, currentParticipants: 0, price: 0, status: 'upcoming', image: '', tags: [], createdAt: '', expiresAt: '',
     });
@@ -237,43 +242,11 @@ const Events: React.FC = () => {
 
       {/* Events Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredEvents.map((event) => (
-          <div key={event.id} className="bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition-shadow group overflow-hidden flex flex-col">
-            <div className="relative">
-              <img
-                src={event.image}
-                alt={event.title}
-                className="w-full h-44 object-cover group-hover:brightness-90 transition"
-              />
-              <div className="absolute top-3 left-3 flex gap-2">
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(event.type)}`}>{event.type}</span>
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(event.status)}`}>{event.status}</span>
-              </div>
-              <div className="absolute bottom-3 left-3 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow">
-                {event.date}
-              </div>
-            </div>
-            <div className="flex-1 flex flex-col p-5">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate">{event.title}</h3>
-              <div className="flex items-center text-xs text-gray-500 dark:text-gray-300 mb-2 gap-2">
-                <span>{event.location}</span>
-                <span>•</span>
-                <span>{event.time}</span>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{event.description}</p>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {event.tags.map(tag => (
-                  <span key={tag} className="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-200 rounded-full text-xs font-medium">{tag}</span>
-                ))}
-              </div>
-              <div className="mt-auto flex gap-2">
-                <button className="flex-1 px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition">View</button>
-                <button className="flex-1 px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">Join</button>
-              </div>
-            </div>
-          </div>
+        {filteredEvents.map((event, idx) => (
+          <ParallaxEventCard key={event.id} event={event} idx={idx} />
         ))}
       </div>
+      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={300} />} 
 
       {filteredEvents.length === 0 && (
         <div className="text-center py-12">
@@ -341,6 +314,96 @@ const Events: React.FC = () => {
         </div>
       )}
     </div>
+  );
+};
+
+// Parallax Event Card with animation
+const ParallaxEventCard: React.FC<{ event: Event; idx: number }> = ({ event, idx }) => {
+  const [show, setShow] = useState(false);
+  const [xy, setXY] = useState([0, 0]);
+  const spring = useSpring({
+    transform: `perspective(800px) rotateX(${xy[1]}deg) rotateY(${xy[0]}deg) scale(${show ? 1 : 0.9})`,
+    opacity: show ? 1 : 0,
+    config: { mass: 2, tension: 300, friction: 30 },
+    delay: idx * 120,
+  });
+  useEffect(() => {
+    const timeout = setTimeout(() => setShow(true), idx * 120);
+    return () => clearTimeout(timeout);
+  }, [idx]);
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const rect = (e.target as HTMLDivElement).getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -20;
+    setXY([x, y]);
+  };
+  const handleMouseLeave = () => setXY([0, 0]);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'upcoming':
+        return 'bg-blue-100 text-blue-800 animate-bounce';
+      case 'ongoing':
+        return 'bg-green-100 text-green-800 animate-pulse';
+      case 'completed':
+        return 'bg-gray-100 text-gray-800 animate-bounce';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 animate-pulse';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'webinar':
+        return 'bg-purple-100 text-purple-800 animate-bounce';
+      case 'seminar':
+        return 'bg-orange-100 text-orange-800 animate-pulse';
+      case 'course':
+        return 'bg-green-100 text-green-800 animate-bounce';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+  return (
+    <animated.div
+      style={spring}
+      className="bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-blue-900 dark:via-gray-900 dark:to-purple-900 rounded-xl shadow-xl hover:shadow-2xl transition-shadow group overflow-hidden flex flex-col cursor-pointer"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="relative">
+        <img
+          src={event.image}
+          alt={event.title}
+          className="w-full h-44 object-cover group-hover:brightness-90 group-hover:scale-105 transition-all duration-300 animate-pop-in"
+        />
+        <div className="absolute top-3 left-3 flex gap-2">
+          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(event.type)}`}>{event.type}</span>
+          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(event.status)}`}>{event.status}</span>
+        </div>
+        <div className="absolute bottom-3 left-3 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow animate-fade-in">
+          {event.date}
+        </div>
+      </div>
+      <div className="flex-1 flex flex-col p-5">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate animate-pop-in">{event.title}</h3>
+        <div className="flex items-center text-xs text-gray-500 dark:text-gray-300 mb-2 gap-2 animate-fade-in-up">
+          <span>{event.location}</span>
+          <span>•</span>
+          <span>{event.time}</span>
+        </div>
+        <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2 animate-fade-in-up">{event.description}</p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {event.tags.map(tag => (
+            <span key={tag} className="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-200 rounded-full text-xs font-medium animate-pop-in">{tag}</span>
+          ))}
+        </div>
+        <div className="mt-auto flex gap-2">
+          <button className="flex-1 px-3 py-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-lg font-bold shadow hover:from-blue-700 hover:to-pink-700 hover:scale-105 transition-all animate-pop-in">View</button>
+          <button className="flex-1 px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-semibold shadow hover:bg-gray-300 dark:hover:bg-gray-600 hover:scale-105 transition-all animate-pop-in">Join</button>
+        </div>
+      </div>
+    </animated.div>
   );
 };
 

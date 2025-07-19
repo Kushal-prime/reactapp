@@ -29,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   ]);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Dark mode state for mobile toggle
+  // Dark mode state and toggle function for header
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
   const toggleDark = () => {
     setDark(d => {
@@ -74,8 +74,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Notifications */}
-          <div className="relative">
+          {/* Notifications and dark mode toggle */}
+          <div className="relative flex items-center">
             <button className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-md relative" onClick={() => setShowNotifications(v => !v)}>
               <Bell className="w-6 h-6" />
               {unreadCount > 0 && (
@@ -84,52 +84,14 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                 </span>
               )}
             </button>
-            {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                <div className="py-1">
-                  <div className="px-4 py-2 border-b">
-                    <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
-                  </div>
-                  {notifications.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-gray-500">
-                      No notifications
-                    </div>
-                  ) : (
-                    notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${
-                          !notification.read ? 'bg-blue-50' : ''
-                        }`}
-                        onClick={() => markAsRead(notification.id)}
-                      >
-                        <div className="flex items-start">
-                          <div className="flex-shrink-0">
-                            <div className={`w-2 h-2 rounded-full ${
-                              notification.type === 'warning' ? 'bg-yellow-400' :
-                              notification.type === 'error' ? 'bg-red-400' :
-                              notification.type === 'success' ? 'bg-green-400' :
-                              'bg-blue-400'
-                            }`} />
-                          </div>
-                          <div className="ml-3 flex-1">
-                            <p className="text-sm font-medium text-gray-900">
-                              {notification.title}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-1">
-                              {new Date(notification.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
+            {/* Dark mode toggle next to notification bell, visible on all screens */}
+            <button
+              className="ml-2 p-2 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+              onClick={toggleDark}
+              aria-label="Toggle dark mode"
+            >
+              {dark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-700" />}
+            </button>
           </div>
 
           {/* User profile */}
@@ -148,15 +110,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
               <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
             </div>
           </div>
-
-          {/* Mobile dark mode toggle - moved to far right */}
-          <button
-            className="ml-2 p-2 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
-            onClick={toggleDark}
-            aria-label="Toggle dark mode"
-          >
-            {dark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-700" />}
-          </button>
         </div>
       </div>
     </header>

@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useSpring, animated } from 'react-spring';
 import Confetti from 'react-confetti';
+import { Dialog } from '@headlessui/react';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -232,6 +233,21 @@ const Dashboard: React.FC = () => {
   // Confetti for section click
   const [confettiSection, setConfettiSection] = useState<number|null>(null);
 
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [projectForm, setProjectForm] = useState({ title: '', client: '', progress: 0 });
+  const [projects, setProjects] = useState(recentProjects);
+
+  // Add Project handler
+  const handleAddProject = (e: React.FormEvent) => {
+    e.preventDefault();
+    setProjects([
+      ...projects,
+      { title: projectForm.title, client: projectForm.client, progress: Number(projectForm.progress) }
+    ]);
+    setProjectForm({ title: '', client: '', progress: 0 });
+    setShowProjectModal(false);
+  };
+
   return (
     <div className="space-y-10 min-h-screen bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100 relative overflow-hidden">
       {/* Animated Morphing Blobs */}
@@ -263,7 +279,7 @@ const Dashboard: React.FC = () => {
           <div className="flex flex-col items-center gap-2 w-full mt-4">
             <div className="text-sm font-semibold text-gray-400 mb-1 animate-fade-in-up">Quick Actions</div>
             <div className="flex gap-4">
-              <a href="/dashboard/projects" className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 via-teal-400 to-blue-300 text-white rounded-xl font-bold shadow hover:from-blue-600 hover:to-teal-400 hover:scale-105 transition-all duration-150 animate-pop-in"><FolderOpen className="w-5 h-5" /> Add Project</a>
+              <button onClick={() => setShowProjectModal(true)} className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 via-teal-400 to-blue-300 text-white rounded-xl font-bold shadow hover:from-blue-600 hover:to-teal-400 hover:scale-105 transition-all duration-150 animate-pop-in"><FolderOpen className="w-5 h-5" /> Add Project</button>
               <a href="/dashboard/tasks" className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-400 via-purple-400 to-yellow-300 text-white rounded-xl font-bold shadow hover:from-pink-500 hover:to-yellow-400 hover:scale-105 transition-all duration-150 animate-pop-in"><TrendingUp className="w-5 h-5" /> Add Task</a>
               <a href="/dashboard/clients" className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 via-teal-400 to-blue-300 text-white rounded-xl font-bold shadow hover:from-green-600 hover:to-teal-400 hover:scale-105 transition-all duration-150 animate-pop-in"><Users className="w-5 h-5" /> Add Client</a>
             </div>
@@ -371,7 +387,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-xl p-6 border-2 border-white/40 dark:border-gray-800/40 animate-fade-in-up">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">📈 Recent Projects</h2>
           <div className="space-y-4">
-            {recentProjects.map((proj) => (
+            {projects.map((proj) => (
               <div key={proj.title} className="mb-2 animate-pop-in hover:scale-105 hover:shadow-lg transition-transform duration-200 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 rounded-xl p-4">
                 <div className="flex justify-between items-center">
                   <div className="font-semibold text-gray-800 dark:text-white">{proj.title}</div>
@@ -433,6 +449,30 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
       </div>
+      {/* Project Modal */}
+      <Dialog open={showProjectModal} onClose={() => setShowProjectModal(false)} className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <Dialog.Panel className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fade-in">
+          <Dialog.Title className="text-2xl font-bold mb-4 text-primary-700">Add Project</Dialog.Title>
+          <form onSubmit={handleAddProject} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Title</label>
+              <input type="text" name="title" value={projectForm.title} onChange={e => setProjectForm(f => ({ ...f, title: e.target.value }))} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Client</label>
+              <input type="text" name="client" value={projectForm.client} onChange={e => setProjectForm(f => ({ ...f, client: e.target.value }))} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Progress (%)</label>
+              <input type="number" name="progress" value={projectForm.progress} onChange={e => setProjectForm(f => ({ ...f, progress: e.target.value }))} min={0} max={100} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required />
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition font-bold">Add</button>
+              <button type="button" onClick={() => setShowProjectModal(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition font-bold">Cancel</button>
+            </div>
+          </form>
+        </Dialog.Panel>
+      </Dialog>
     </div>
   );
 };

@@ -2,7 +2,6 @@ import React, { useState, createContext, useContext, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { Outlet } from 'react-router-dom';
-import { Moon, Sun } from 'lucide-react';
 
 // Toast context for global notifications
 const ToastContext = createContext<(msg: string) => void>(() => {});
@@ -12,7 +11,6 @@ const Layout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toast, setToast] = useState('');
   const [loading, setLoading] = useState(false);
-  const [dark, setDark] = useState(false);
 
   // Toast auto-hide
   const showToast = (msg: string) => {
@@ -23,14 +21,6 @@ const Layout: React.FC = () => {
   // Loading overlay control for children
   const showLoading = () => setLoading(true);
   const hideLoading = () => setLoading(false);
-
-  useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [dark]);
 
   return (
     <ToastContext.Provider value={showToast}>
@@ -52,14 +42,6 @@ const Layout: React.FC = () => {
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-h-screen">
-          {/* Dark mode toggle */}
-          <button
-            className="absolute top-6 right-8 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-2 shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-            onClick={() => setDark(d => !d)}
-            aria-label="Toggle dark mode"
-          >
-            {dark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-700" />}
-          </button>
           <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
           {toast && (
             <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded shadow-lg animate-fade-in">

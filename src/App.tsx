@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
@@ -16,29 +16,54 @@ import Clients from './pages/Clients';
 import Tasks from './pages/Tasks';
 import './App.css';
 
+// Error Boundary Component
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean, error: any }> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: any, errorInfo: any) {
+    // You can log errorInfo here if needed
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div style={{ padding: 40, color: 'red', fontSize: 20 }}>
+        <b>Something went wrong:</b>
+        <pre>{this.state.error?.toString()}</pre>
+      </div>;
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Layout />}> {/* Dashboard layout wrapper */}
-          <Route index element={<Dashboard />} />
-          <Route path="projects" element={<Projects />} />
-          <Route path="tickets" element={<Tickets />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="events" element={<Events />} />
-          <Route path="updates" element={<Updates />} />
-          <Route path="deliverables" element={<Deliverables />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="clients" element={<Clients />} />
-          <Route path="tasks" element={<Tasks />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Layout />}> {/* Dashboard layout wrapper */}
+            <Route index element={<Dashboard />} />
+            <Route path="projects" element={<Projects />} />
+            <Route path="tickets" element={<Tickets />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="events" element={<Events />} />
+            <Route path="updates" element={<Updates />} />
+            <Route path="deliverables" element={<Deliverables />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="clients" element={<Clients />} />
+            <Route path="tasks" element={<Tasks />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, Search, MessageSquare, CheckCircle, AlertTriangle, XCircle, Info, PlusCircle } from 'lucide-react';
 
 interface TicketType {
@@ -116,64 +116,9 @@ const TicketsPage: React.FC = () => {
       </div>
       {/* Tickets Card Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {filteredTickets.map((ticket, idx) => {
-          const gradients = [
-            'from-yellow-100 via-yellow-200 to-yellow-300',
-            'from-pink-100 via-pink-200 to-pink-300',
-            'from-blue-100 via-blue-200 to-blue-300',
-            'from-green-100 via-green-200 to-green-300',
-            'from-purple-100 via-purple-200 to-purple-300',
-            'from-indigo-100 via-indigo-200 to-indigo-300',
-            'from-teal-100 via-teal-200 to-teal-300',
-            'from-orange-100 via-orange-200 to-orange-300',
-          ];
-          const gradient = gradients[idx % gradients.length];
-          const statusIcons = {
-            open: '🟢',
-            'in-progress': '⏳',
-            resolved: '✅',
-            closed: '❌',
-          };
-          const priorityIcons = {
-            urgent: '🔥',
-            high: '⚡',
-            medium: '🔔',
-            low: '🌱',
-          };
-          return (
-            <div
-              key={ticket.id}
-              className={`bg-gradient-to-br ${gradient} dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-3xl shadow-xl p-6 flex flex-col gap-4 items-center hover:scale-105 hover:shadow-2xl transition-all duration-300 animate-fade-in border-b-8 border-primary-200`}
-            >
-              <div className="flex items-center gap-2 w-full justify-between">
-                <span className="text-2xl">{statusIcons[ticket.status]}</span>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
-                  ticket.status === 'open' ? 'bg-blue-100 text-blue-700' :
-                  ticket.status === 'in-progress' ? 'bg-yellow-100 text-yellow-700' :
-                  ticket.status === 'resolved' ? 'bg-green-100 text-green-700' :
-                  'bg-gray-100 text-gray-700'
-                }`}>{ticket.status}</span>
-              </div>
-              <div className="text-2xl font-extrabold text-primary-700 dark:text-primary-300 text-center w-full truncate">{ticket.title}</div>
-              <div className="w-full flex items-center gap-2 justify-center">
-                <span className="text-lg">{priorityIcons[ticket.priority]}</span>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
-                  ticket.priority === 'urgent' ? 'bg-red-100 text-red-700' :
-                  ticket.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                  ticket.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-green-100 text-green-700'
-                }`}>{ticket.priority}</span>
-              </div>
-              <div className="text-sm text-gray-700 dark:text-gray-200 w-full text-center">{ticket.assignedTo || 'Unassigned'}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 w-full text-center line-clamp-2">{ticket.description}</div>
-              <div className="flex gap-2 mt-2 w-full justify-center">
-                <button onClick={() => handleView(ticket)} className="p-2 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition" title="View">👁️</button>
-                <button onClick={() => handleEdit(ticket)} className="p-2 bg-green-500 text-white rounded-full shadow hover:bg-green-600 transition" title="Edit">✏️</button>
-                <button onClick={() => handleDelete(ticket.id)} className="p-2 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition" title="Delete">🗑️</button>
-              </div>
-            </div>
-          );
-        })}
+        {filteredTickets.map((ticket, idx) => (
+          <TicketCard key={ticket.id} ticket={ticket} idx={idx} handleView={handleView} handleEdit={handleEdit} handleDelete={handleDelete} />
+        ))}
       </div>
       {filteredTickets.length === 0 && (
         <div className="text-center py-8 text-gray-400 text-xl">No tickets found. <span>😢</span></div>
@@ -298,6 +243,82 @@ const TicketModal: React.FC<TicketModalProps> = ({ mode, ticket, onClose, onSave
             </button>
           )}
         </form>
+      </div>
+    </div>
+  );
+};
+
+// Animated Ticket Card
+const TicketCard: React.FC<{ ticket: TicketType; idx: number; handleView: (t: TicketType) => void; handleEdit: (t: TicketType) => void; handleDelete: (id: string) => void }> = ({ ticket, idx, handleView, handleEdit, handleDelete }) => {
+  const [show, setShow] = useState(false);
+  const [titleDisplay, setTitleDisplay] = useState('');
+  useEffect(() => {
+    const timeout = setTimeout(() => setShow(true), idx * 120);
+    return () => clearTimeout(timeout);
+  }, [idx]);
+  useEffect(() => {
+    if (show && titleDisplay.length < ticket.title.length) {
+      const timeout = setTimeout(() => {
+        setTitleDisplay(ticket.title.slice(0, titleDisplay.length + 1));
+      }, 20);
+      return () => clearTimeout(timeout);
+    }
+  }, [show, titleDisplay, ticket.title]);
+  const gradients = [
+    'from-violet-100 via-violet-200 to-violet-300',
+    'from-pink-100 via-pink-200 to-pink-300',
+    'from-blue-100 via-blue-200 to-blue-300',
+    'from-green-100 via-green-200 to-green-300',
+    'from-purple-100 via-purple-200 to-purple-300',
+    'from-indigo-100 via-indigo-200 to-indigo-300',
+    'from-teal-100 via-teal-200 to-teal-300',
+    'from-orange-100 via-orange-200 to-orange-300',
+  ];
+  const gradient = gradients[idx % gradients.length];
+  const statusIcons = {
+    open: '🟢',
+    'in-progress': '⏳',
+    resolved: '✅',
+    closed: '❌',
+  };
+  const priorityIcons = {
+    urgent: '🔥',
+    high: '⚡',
+    medium: '🔔',
+    low: '🌱',
+  };
+  return (
+    <div
+      className={`bg-gradient-to-br ${gradient} dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-3xl shadow-xl p-6 flex flex-col gap-4 items-center border-b-8 border-primary-200 transition-all duration-300 ${show ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'} hover:scale-110 hover:shadow-2xl hover:shadow-violet-200 dark:hover:shadow-violet-900 animate-pop-in`}
+      style={{ transitionDelay: `${idx * 80}ms` }}
+    >
+      <div className="flex items-center gap-2 w-full justify-between">
+        <span className="text-2xl animate-pop-in">{statusIcons[ticket.status]}</span>
+        <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm animate-fade-in ${
+          ticket.status === 'open' ? 'bg-blue-100 text-blue-700' :
+          ticket.status === 'in-progress' ? 'bg-violet-100 text-violet-700' :
+          ticket.status === 'resolved' ? 'bg-green-100 text-green-700' :
+          'bg-gray-100 text-gray-700'
+        }`}>{ticket.status}</span>
+      </div>
+      <div className="text-2xl font-extrabold text-primary-700 dark:text-primary-300 text-center w-full truncate animate-fade-in-up">
+        {titleDisplay}<span className="w-1 h-7 bg-violet-400 inline-block ml-1 align-middle animate-blink rounded" />
+      </div>
+      <div className="w-full flex items-center gap-2 justify-center animate-fade-in-up">
+        <span className="text-lg animate-pop-in">{priorityIcons[ticket.priority]}</span>
+        <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm animate-fade-in ${
+          ticket.priority === 'urgent' ? 'bg-red-100 text-red-700' :
+          ticket.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+          ticket.priority === 'medium' ? 'bg-violet-100 text-violet-700' :
+          'bg-green-100 text-green-700'
+        }`}>{ticket.priority}</span>
+      </div>
+      <div className="text-sm text-gray-700 dark:text-gray-200 w-full text-center animate-fade-in-up">{ticket.assignedTo || 'Unassigned'}</div>
+      <div className="text-xs text-gray-500 dark:text-gray-400 w-full text-center line-clamp-2 animate-fade-in-up">{ticket.description}</div>
+      <div className="flex gap-2 mt-2 w-full justify-center">
+        <button onClick={() => handleView(ticket)} className="p-2 bg-blue-500 text-white rounded-full shadow hover:bg-blue-600 transition animate-pop-in" title="View">👁️</button>
+        <button onClick={() => handleEdit(ticket)} className="p-2 bg-green-500 text-white rounded-full shadow hover:bg-green-600 transition animate-pop-in" title="Edit">✏️</button>
+        <button onClick={() => handleDelete(ticket.id)} className="p-2 bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition animate-pop-in" title="Delete">🗑️</button>
       </div>
     </div>
   );

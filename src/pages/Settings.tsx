@@ -46,6 +46,13 @@ const Settings: React.FC = () => {
     compactMode: false
   });
 
+  // For staggered section animation
+  const [showSections, setShowSections] = useState([false, false, false, false]);
+  useEffect(() => {
+    const timers = [0, 1, 2, 3].map(i => setTimeout(() => setShowSections(s => s.map((v, idx) => idx === i ? true : v)), 200 + i * 180));
+    return () => timers.forEach(clearTimeout);
+  }, [activeTab]);
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark', appearanceSettings.theme === 'dark');
     localStorage.setItem('theme', appearanceSettings.theme);
@@ -67,14 +74,14 @@ const Settings: React.FC = () => {
   return (
     <div className="space-y-8 max-w-3xl mx-auto mt-10">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 animate-fade-in-up">
         <div>
           <h1 className="text-3xl font-extrabold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent animate-gradient-x">Settings</h1>
           <p className="text-gray-600 mt-1">Manage your account preferences and system settings</p>
         </div>
         <button
           onClick={handleSave}
-          className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded-lg font-semibold shadow-lg hover:from-green-500 hover:to-green-700 hover:scale-105 transition-all duration-200 text-lg animate-bounce-once"
+          className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-green-400 via-green-500 to-green-600 text-white rounded-lg font-semibold shadow-lg hover:from-green-500 hover:to-green-700 hover:scale-110 hover:shadow-green-200 dark:hover:shadow-green-900 transition-all duration-200 text-lg animate-bounce-once animate-pop-in"
         >
           <Save className="h-5 w-5 mr-2" />
           Save Changes
@@ -82,10 +89,10 @@ const Settings: React.FC = () => {
       </div>
 
       {/* Settings Layout */}
-      <div className="bg-gradient-to-br from-white via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl shadow-2xl divide-y divide-gray-100 border-2 border-blue-100 dark:border-gray-800">
+      <div className="bg-gradient-to-br from-white via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl shadow-2xl divide-y divide-gray-100 border-2 border-blue-100 dark:border-gray-800 animate-fade-in-up">
         <div className="border-b border-gray-200 dark:border-gray-700">
           <nav className="flex space-x-8 px-6 pt-4">
-            {tabs.map((tab) => {
+            {tabs.map((tab, i) => {
               const Icon = tab.icon;
               return (
                 <button
@@ -93,9 +100,10 @@ const Settings: React.FC = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center py-4 px-1 border-b-4 font-bold text-lg transition-all duration-200 relative group focus:outline-none ${
                     activeTab === tab.id
-                      ? 'border-pink-500 text-pink-600 bg-gradient-to-r from-pink-100 via-purple-100 to-blue-100 dark:from-pink-900 dark:via-purple-900 dark:to-blue-900 shadow-md scale-105'
+                      ? 'border-pink-500 text-pink-600 bg-gradient-to-r from-pink-100 via-purple-100 to-blue-100 dark:from-pink-900 dark:via-purple-900 dark:to-blue-900 shadow-md scale-110 animate-pop-in'
                       : 'border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300'
                   }`}
+                  style={{ transitionDelay: `${i * 80}ms` }}
                 >
                   <Icon className="h-5 w-5 mr-2 group-hover:scale-125 transition-transform" />
                   {tab.name}
@@ -108,13 +116,13 @@ const Settings: React.FC = () => {
 
         <div className="p-8">
           {toast && (
-            <div className="mb-4 p-3 bg-green-100 text-green-800 rounded shadow text-center animate-fade-in">
+            <div className="mb-4 p-3 bg-green-100 text-green-800 rounded shadow text-center animate-fade-in animate-pop-in">
               {toast}
             </div>
           )}
           {/* Profile Settings */}
           {activeTab === 'profile' && (
-            <div className="space-y-6 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-pink-900 dark:via-purple-900 dark:to-blue-900 rounded-xl p-6 shadow-md animate-fade-in">
+            <div className={`space-y-6 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-pink-900 dark:via-purple-900 dark:to-blue-900 rounded-xl p-6 shadow-md ${showSections[0] ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '0ms' }}>
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Profile Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -180,7 +188,7 @@ const Settings: React.FC = () => {
 
           {/* Notification Settings */}
           {activeTab === 'notifications' && (
-            <div className="space-y-6 bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 dark:from-yellow-900 dark:via-orange-900 dark:to-pink-900 rounded-xl p-6 shadow-md animate-fade-in">
+            <div className={`space-y-6 bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 dark:from-yellow-900 dark:via-orange-900 dark:to-pink-900 rounded-xl p-6 shadow-md ${showSections[1] ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '180ms' }}>
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Notification Preferences</h3>
                 <div className="space-y-4">
@@ -215,7 +223,7 @@ const Settings: React.FC = () => {
 
           {/* Security Settings */}
           {activeTab === 'security' && (
-            <div className="space-y-6 bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-green-900 dark:via-blue-900 dark:to-purple-900 rounded-xl p-6 shadow-md animate-fade-in">
+            <div className={`space-y-6 bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-green-900 dark:via-blue-900 dark:to-purple-900 rounded-xl p-6 shadow-md ${showSections[2] ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '360ms' }}>
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Security Settings</h3>
                 <div className="space-y-6">
@@ -276,7 +284,7 @@ const Settings: React.FC = () => {
 
           {/* Appearance Settings */}
           {activeTab === 'appearance' && (
-            <div className="space-y-6 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 rounded-xl p-6 shadow-md animate-fade-in">
+            <div className={`space-y-6 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 rounded-xl p-6 shadow-md ${showSections[3] ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'}`} style={{ transitionDelay: '540ms' }}>
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Appearance</h3>
                 <div className="flex items-center justify-between mb-4">

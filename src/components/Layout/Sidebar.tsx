@@ -15,6 +15,7 @@ import {
   CheckSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -44,22 +45,51 @@ const Sidebar: React.FC = () => {
       </div>
       
       <div className="flex-1 px-4 py-6">
-        <nav className="space-y-2">
-          {navigation.map((item) => {
+        <nav className="space-y-2 relative">
+          {/* Animated highlight bar */}
+          <motion.div
+            layoutId="sidebar-highlight"
+            className="absolute left-0 w-full h-10 bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 rounded-md z-0"
+            style={{ top: navigation.findIndex(item => isActive(item.href)) * 44 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          />
+          {navigation.map((item, idx) => {
             const Icon = item.icon;
+            const active = isActive(item.href);
             return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  isActive(item.href)
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                <Icon className="w-5 h-5 mr-3" />
-                {item.name}
-              </Link>
+              <motion.div key={item.name} layout className="relative z-10">
+                <Link
+                  to={item.href}
+                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors relative overflow-hidden ${
+                    active
+                      ? 'bg-transparent text-primary-700 font-bold'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                  style={{ minHeight: 40 }}
+                >
+                  {/* Ripple effect on hover */}
+                  <motion.span
+                    whileHover={{ scale: 1.2, color: '#a78bfa', filter: 'drop-shadow(0 0 8px #a78bfa)' }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                    className="mr-3 flex items-center"
+                  >
+                    <Icon className="w-5 h-5" />
+                  </motion.span>
+                  {item.name}
+                  {/* Glow effect on active */}
+                  {active && (
+                    <motion.span
+                      layoutId="sidebar-glow"
+                      className="absolute inset-0 rounded-md pointer-events-none"
+                      style={{ boxShadow: '0 0 16px 4px #a78bfa55' }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    />
+                  )}
+                </Link>
+              </motion.div>
             );
           })}
         </nav>

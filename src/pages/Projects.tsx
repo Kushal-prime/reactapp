@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react';
 import { useToast } from '../components/Layout/Layout';
+import { motion } from 'framer-motion';
+import Confetti from 'react-confetti';
+import { useRef } from 'react';
 
 interface ProjectType {
   id: string;
@@ -53,6 +56,8 @@ const ProjectsPage: React.FC = () => {
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add');
   const [selectedProject, setSelectedProject] = useState<ProjectType | null>(null);
   const showToast = useToast();
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiRef = useRef<HTMLDivElement>(null);
 
   const filteredProjects = projects.filter(project =>
     project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -89,9 +94,13 @@ const ProjectsPage: React.FC = () => {
     if (modalMode === 'add') {
       setProjects([...projects, { ...project, id: Date.now().toString() }]);
       showToast('Project added!');
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2000);
     } else if (modalMode === 'edit' && selectedProject) {
       setProjects(projects.map(p => (p.id === selectedProject.id ? { ...project, id: selectedProject.id } : p)));
       showToast('Project updated!');
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2000);
     }
     setShowModal(false);
   };
@@ -108,43 +117,112 @@ const ProjectsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Projects</h1>
-        <button
-          onClick={handleAdd}
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 shadow"
-        >
-          <Plus className="w-5 h-5 mr-2" /> Add Project
-        </button>
-      </div>
-      <div className="mb-4 flex items-center">
-        <Search className="w-5 h-5 text-gray-400 mr-2" />
-        <input
-          type="text"
-          placeholder="Search projects..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+      {/* Morphing Blobs */}
+      <motion.svg viewBox="0 0 600 600" className="absolute top-0 left-0 w-96 h-96 opacity-30 -z-10">
+        <motion.path fill="#a78bfa"
+          animate={{
+            d: [
+              'M421,320Q420,390,350,420Q280,450,210,420Q140,390,140,320Q140,250,210,220Q280,190,350,220Q420,250,421,320Z',
+              'M400,320Q420,390,350,420Q280,450,210,420Q140,390,160,320Q180,250,250,220Q320,190,390,220Q460,250,400,320Z',
+              'M421,320Q420,390,350,420Q280,450,210,420Q140,390,140,320Q140,250,210,220Q280,190,350,220Q420,250,421,320Z',
+            ]
+          }}
+          transition={{ repeat: Infinity, duration: 8, ease: 'easeInOut' }}
         />
-      </div>
-      {/* Projects Card Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {filteredProjects.map((project, idx) => (
-          <ProjectCard key={project.id} project={project} idx={idx} handleView={handleView} handleEdit={handleEdit} handleDelete={handleDelete} />
-        ))}
-      </div>
-      {filteredProjects.length === 0 && (
-        <div className="text-center py-8 text-gray-400 text-xl">No projects found. <span>😢</span></div>
-      )}
-      {showModal && (
-        <ProjectModal
-          mode={modalMode}
-          project={selectedProject}
-          onClose={() => setShowModal(false)}
-          onSave={handleSave}
+      </motion.svg>
+      <motion.svg viewBox="0 0 600 600" className="absolute bottom-0 right-0 w-96 h-96 opacity-30 -z-10">
+        <motion.path fill="#f472b6"
+          animate={{
+            d: [
+              'M421,320Q420,390,350,420Q280,450,210,420Q140,390,140,320Q140,250,210,220Q280,190,350,220Q420,250,421,320Z',
+              'M400,320Q420,390,350,420Q280,450,210,420Q140,390,160,320Q180,250,250,220Q320,190,390,220Q460,250,400,320Z',
+              'M421,320Q420,390,350,420Q280,450,210,420Q140,390,140,320Q140,250,210,220Q280,190,350,220Q420,250,421,320Z',
+            ]
+          }}
+          transition={{ repeat: Infinity, duration: 10, ease: 'easeInOut' }}
         />
-      )}
+      </motion.svg>
+      {/* Confetti burst on add/update */}
+      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={300} />} 
+      {/* Animated Section Header & Divider */}
+      <motion.h2 initial={{ opacity: 0, y: -40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }} className="text-3xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-8 text-center animate-gradient-x">Projects <span>📁</span></motion.h2>
+      <motion.svg viewBox="0 0 1440 80" className="w-full h-8 mb-8">
+        <motion.path fill="#a78bfa" fillOpacity=".2"
+          animate={{
+            d: [
+              'M0,40L80,50C160,60,320,80,480,70C640,60,800,40,960,33C1120,27,1280,25,1360,24L1440,24L1440,80L1360,80C1280,80,1120,80,960,80C800,80,640,80,480,80C320,80,160,80,80,80L0,80Z',
+              'M0,60L80,40C160,20,320,0,480,20C640,40,800,60,960,50C1120,40,1280,60,1360,70L1440,60L1440,80L1360,80C1280,80,1120,80,960,80C800,80,640,80,480,80C320,80,160,80,80,80L0,80Z',
+              'M0,40L80,50C160,60,320,80,480,70C640,60,800,40,960,33C1120,27,1280,25,1360,24L1440,24L1440,80L1360,80C1280,80,1120,80,960,80C800,80,640,80,480,80C320,80,160,80,80,80L0,80Z',
+            ]
+          }}
+          transition={{ repeat: Infinity, duration: 10, ease: 'easeInOut' }}
+        />
+      </motion.svg>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Projects</h1>
+          <button
+            onClick={handleAdd}
+            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 shadow"
+          >
+            <Plus className="w-5 h-5 mr-2" /> Add Project
+          </button>
+        </div>
+        <div className="mb-4 flex items-center">
+          <Search className="w-5 h-5 text-gray-400 mr-2" />
+          <input
+            type="text"
+            placeholder="Search projects..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+        {/* Projects Card Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {filteredProjects.map((project, idx) => (
+            <motion.div
+              key={project.id}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              className="rounded-3xl shadow-lg p-6 flex flex-col items-center gap-3 border-4 transition-all duration-300 backdrop-blur-lg bg-white/30 dark:bg-gray-900/30 border-white/40 dark:border-gray-800/40 hover:scale-110 hover:shadow-2xl hover:shadow-blue-200 dark:hover:shadow-blue-900 animate-pop-in"
+              style={{ transitionDelay: `${idx * 80}ms` }}
+            >
+              <div className="text-3xl mb-2 animate-bounce">📁</div>
+              <div className="text-lg font-extrabold text-blue-700 dark:text-blue-300 mb-1 animate-fade-in-up">
+                {project.title}<span className="w-1 h-6 bg-blue-400 inline-block ml-1 align-middle animate-blink rounded" />
+              </div>
+              <div className="text-sm text-gray-700 dark:text-gray-200 mb-1 animate-fade-in-up">{project.description}</div>
+              <div className="text-xs text-gray-400 mb-3 animate-fade-in-up">Client: {project.client}</div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold animate-pop-in ${getStatusBadge(project.status)}`}>{project.status}</span>
+                <span className="text-xs text-gray-500">{project.progress}%</span>
+              </div>
+              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 mb-2">
+                <div className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 h-3 rounded-full" style={{ width: `${project.progress}%` }}></div>
+              </div>
+              <div className="flex gap-2 mt-auto">
+                <button onClick={() => handleView(project)} className="px-3 py-1 bg-blue-400 text-white rounded hover:bg-blue-500 transition flex items-center gap-1 font-bold animate-pop-in">View</button>
+                <button onClick={() => handleEdit(project)} className="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition flex items-center gap-1 font-bold animate-pop-in">Edit</button>
+                <button onClick={() => handleDelete(project.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition flex items-center gap-1 font-bold animate-pop-in">Delete</button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        {filteredProjects.length === 0 && (
+          <div className="text-center py-8 text-gray-400 text-xl">No projects found. <span>😢</span></div>
+        )}
+        {showModal && (
+          <ProjectModal
+            mode={modalMode}
+            project={selectedProject}
+            onClose={() => setShowModal(false)}
+            onSave={handleSave}
+          />
+        )}
+      </div>
     </div>
   );
 };
