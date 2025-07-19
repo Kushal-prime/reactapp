@@ -4,23 +4,28 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 import { User } from '../types';
 import axios from 'axios';
+import { useToast } from '../components/Layout/Layout';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const showToast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
+    setLoading(true);
+    setError('');
     try {
-      // Extract access token from credentialResponse
       const accessToken = credentialResponse.access_token || credentialResponse.credential;
       if (!accessToken) {
         setError('Google login failed: No access token.');
+        showToast('Google login failed: No access token.');
+        setLoading(false);
         return;
       }
-      // Fetch user info from Google
       const res = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
@@ -29,19 +34,25 @@ const Login: React.FC = () => {
         id: profile.id,
         name: profile.name,
         email: profile.email,
-        role: 'admin', // or 'provider'/'student' if you want to map by email
-        avatar: profile.picture
+        role: 'admin',
+        avatar: profile.picture,
+        // Add extra fields if you want, e.g. locale: profile.locale
       };
       login(googleUser);
-      navigate('/dashboard');
+      showToast('Google login successful!');
+      setLoading(false);
+      navigate('/dashboard/profile');
     } catch (error) {
       setError('Google login failed.');
+      showToast('Google login failed.');
+      setLoading(false);
       console.error('Login error:', error);
     }
   };
 
   const handleGoogleError = () => {
-    console.error('Google login failed');
+    setError('Google login failed.');
+    showToast('Google login failed.');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -64,6 +75,11 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {loading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+            <div className="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
         <div className="flex justify-center mb-4">
           <Link to="/" className="flex items-center gap-2 px-4 py-2 bg-primary-100 text-primary-700 rounded-lg font-semibold shadow hover:bg-primary-200 transition">
             <span className="text-xl">🏠</span> Home

@@ -1,28 +1,45 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Eye, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, User, Shield, GraduationCap, Briefcase, Search } from 'lucide-react';
 
 interface UserType {
   id: string;
   name: string;
   age: number;
   work: string;
-  role: string;
+  role: 'admin' | 'provider' | 'student';
+  emoji?: string;
 }
 
+const pastelColors = [
+  'bg-pink-100', 'bg-blue-100', 'bg-green-100', 'bg-yellow-100', 'bg-purple-100', 'bg-indigo-100', 'bg-teal-100', 'bg-orange-100',
+  'dark:bg-pink-900', 'dark:bg-blue-900', 'dark:bg-green-900', 'dark:bg-yellow-900', 'dark:bg-purple-900', 'dark:bg-indigo-900', 'dark:bg-teal-900', 'dark:bg-orange-900',
+];
+const emojiList = ['👩‍💻', '👨‍💻', '🧑‍🎨', '🧑‍🔬', '🧑‍🏫', '🧑‍💼', '🧑‍🎓', '🧑‍🚀', '🧑‍🔧', '🧑‍⚖️'];
+
+const roleBadge = (role: UserType['role']) => {
+  switch (role) {
+    case 'admin': return { color: 'bg-red-200 text-red-700 dark:bg-red-800 dark:text-red-200', icon: <Shield className="w-4 h-4 inline-block mr-1" /> };
+    case 'provider': return { color: 'bg-blue-200 text-blue-700 dark:bg-blue-800 dark:text-blue-200', icon: <Briefcase className="w-4 h-4 inline-block mr-1" /> };
+    case 'student': return { color: 'bg-green-200 text-green-700 dark:bg-green-800 dark:text-green-200', icon: <GraduationCap className="w-4 h-4 inline-block mr-1" /> };
+    default: return { color: 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-200', icon: <User className="w-4 h-4 inline-block mr-1" /> };
+  }
+};
+
 const initialUsers: UserType[] = [
-  { id: '1', name: 'John Smith', age: 32, work: 'Frontend Developer', role: 'admin' },
-  { id: '2', name: 'Sarah Johnson', age: 28, work: 'UI/UX Designer', role: 'provider' },
-  { id: '3', name: 'Mike Davis', age: 35, work: 'DevOps Engineer', role: 'provider' },
-  { id: '4', name: 'Lisa Chen', age: 22, work: 'Student', role: 'student' },
-  { id: '5', name: 'David Wilson', age: 24, work: 'Student', role: 'student' },
+  { id: '1', name: 'John Smith', age: 32, work: 'Frontend Developer', role: 'admin', emoji: '👨‍💻' },
+  { id: '2', name: 'Sarah Johnson', age: 28, work: 'UI/UX Designer', role: 'provider', emoji: '🧑‍🎨' },
+  { id: '3', name: 'Mike Davis', age: 35, work: 'DevOps Engineer', role: 'provider', emoji: '🧑‍🔬' },
+  { id: '4', name: 'Lisa Chen', age: 22, work: 'Student', role: 'student', emoji: '🧑‍🎓' },
+  { id: '5', name: 'David Wilson', age: 24, work: 'Student', role: 'student', emoji: '🧑‍🎓' },
 ];
 
 const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<UserType[]>(initialUsers);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState<'add' | 'edit' | 'view'>('add');
-  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState<Partial<UserType>>({ role: 'student' });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -30,199 +47,137 @@ const UsersPage: React.FC = () => {
     user.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAdd = () => {
-    setModalMode('add');
-    setSelectedUser(null);
-    setShowModal(true);
+  const validate = () => {
+    const errs: { [key: string]: string } = {};
+    if (!form.name) errs.name = 'Name required';
+    if (!form.age) errs.age = 'Age required';
+    if (!form.work) errs.work = 'Work required';
+    if (!form.role) errs.role = 'Role required';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: '' });
+  };
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setUsers([
+      ...users,
+      { ...form, id: Date.now().toString(), emoji: form.emoji || emojiList[Math.floor(Math.random() * emojiList.length)] } as UserType,
+    ]);
+    setForm({ role: 'student' });
+    setShowForm(false);
   };
 
   const handleEdit = (user: UserType) => {
-    setModalMode('edit');
-    setSelectedUser(user);
-    setShowModal(true);
+    setEditingId(user.id);
+    setForm(user);
+    setShowForm(true);
+    setErrors({});
   };
 
-  const handleView = (user: UserType) => {
-    setModalMode('view');
-    setSelectedUser(user);
-    setShowModal(true);
+  const handleUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setUsers(users.map(u => u.id === editingId ? { ...u, ...form } as UserType : u));
+    setEditingId(null);
+    setForm({ role: 'student' });
+    setShowForm(false);
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(u => u.id !== id));
-    }
-  };
-
-  const handleSave = (user: UserType) => {
-    if (modalMode === 'add') {
-      setUsers([...users, { ...user, id: Date.now().toString() }]);
-    } else if (modalMode === 'edit' && selectedUser) {
-      setUsers(users.map(u => (u.id === selectedUser.id ? { ...user, id: selectedUser.id } : u)));
-    }
-    setShowModal(false);
+    setUsers(users.filter(u => u.id !== id));
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Users</h1>
+    <div className="max-w-6xl mx-auto mt-10">
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center gap-2">Users <span>🧑‍💻</span></h2>
         <button
-          onClick={handleAdd}
-          className="flex items-center px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 shadow"
+          onClick={() => { setShowForm(true); setEditingId(null); setForm({ role: 'student' }); }}
+          className="fixed bottom-8 right-8 z-50 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 text-white rounded-full font-bold shadow-lg hover:scale-110 transition-all text-lg animate-pulse"
         >
-          <Plus className="w-5 h-5 mr-2" /> Add User
+          <Plus className="w-7 h-7" /> Add User <span>🎈</span>
         </button>
       </div>
-      <div className="mb-4 flex items-center">
-        <Search className="w-5 h-5 text-gray-400 mr-2" />
+      <div className="mb-8 flex items-center">
+        <Search className="w-5 h-5 text-indigo-400 mr-2" />
         <input
           type="text"
           placeholder="Search users..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+          className="border border-indigo-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
         />
       </div>
-      <div className="overflow-x-auto bg-white rounded shadow">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Work</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredUsers.map(user => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap font-medium">{user.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.age}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.work}</td>
-                <td className="px-6 py-4 whitespace-nowrap capitalize">{user.role}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                  <button onClick={() => handleView(user)} className="text-blue-500 hover:text-blue-700"><Eye className="inline w-5 h-5" /></button>
-                  <button onClick={() => handleEdit(user)} className="text-green-500 hover:text-green-700"><Edit className="inline w-5 h-5" /></button>
-                  <button onClick={() => handleDelete(user.id)} className="text-red-500 hover:text-red-700"><Trash2 className="inline w-5 h-5" /></button>
-                </td>
-              </tr>
-            ))}
-            {filteredUsers.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-400">No users found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      {showModal && (
-        <UserModal
-          mode={modalMode}
-          user={selectedUser}
-          onClose={() => setShowModal(false)}
-          onSave={handleSave}
-        />
-      )}
-    </div>
-  );
-};
-
-interface UserModalProps {
-  mode: 'add' | 'edit' | 'view';
-  user: UserType | null;
-  onClose: () => void;
-  onSave: (user: UserType) => void;
-}
-
-const UserModal: React.FC<UserModalProps> = ({ mode, user, onClose, onSave }) => {
-  const [form, setForm] = useState<UserType>(
-    user || { id: '', name: '', age: 18, work: '', role: 'student' }
-  );
-  const isView = mode === 'view';
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(form);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">×</button>
-        <h2 className="text-xl font-bold mb-4">
-          {mode === 'add' && 'Add User'}
-          {mode === 'edit' && 'Edit User'}
-          {mode === 'view' && 'User Details'}
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              disabled={isView}
-              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-              required
-            />
+      {showForm && (
+        <form onSubmit={editingId ? handleUpdate : handleAdd} className="bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 dark:from-pink-900 dark:via-purple-900 dark:to-indigo-900 rounded-xl shadow p-6 mb-8 flex flex-wrap gap-4 items-end animate-fade-in">
+          <div className="flex flex-col flex-1 min-w-[120px]">
+            <label className="text-xs font-bold mb-1">Emoji</label>
+            <select name="emoji" value={form.emoji || ''} onChange={handleChange} className="border rounded px-3 py-2">
+              <option value="">Random</option>
+              {emojiList.map(e => <option key={e} value={e}>{e}</option>)}
+            </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Age</label>
-            <input
-              type="number"
-              name="age"
-              value={form.age}
-              onChange={handleChange}
-              disabled={isView}
-              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-              min={1}
-              required
-            />
+          <div className="flex flex-col flex-1 min-w-[120px]">
+            <label className="text-xs font-bold mb-1">Name</label>
+            <input name="name" value={form.name || ''} onChange={handleChange} placeholder="Name" className={`border rounded px-3 py-2 ${errors.name ? 'border-red-500' : 'border-gray-300'}`} />
+            {errors.name && <span className="text-xs text-red-500 mt-1">{errors.name}</span>}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Work</label>
-            <input
-              type="text"
-              name="work"
-              value={form.work}
-              onChange={handleChange}
-              disabled={isView}
-              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-              required
-            />
+          <div className="flex flex-col flex-1 min-w-[120px]">
+            <label className="text-xs font-bold mb-1">Age</label>
+            <input name="age" type="number" value={form.age || ''} onChange={handleChange} placeholder="Age" className={`border rounded px-3 py-2 ${errors.age ? 'border-red-500' : 'border-gray-300'}`} />
+            {errors.age && <span className="text-xs text-red-500 mt-1">{errors.age}</span>}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Role</label>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              disabled={isView}
-              className="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-              required
-            >
+          <div className="flex flex-col flex-1 min-w-[120px]">
+            <label className="text-xs font-bold mb-1">Work</label>
+            <input name="work" value={form.work || ''} onChange={handleChange} placeholder="Work" className={`border rounded px-3 py-2 ${errors.work ? 'border-red-500' : 'border-gray-300'}`} />
+            {errors.work && <span className="text-xs text-red-500 mt-1">{errors.work}</span>}
+          </div>
+          <div className="flex flex-col flex-1 min-w-[120px]">
+            <label className="text-xs font-bold mb-1">Role</label>
+            <select name="role" value={form.role || 'student'} onChange={handleChange} className={`border rounded px-3 py-2 ${errors.role ? 'border-red-500' : 'border-gray-300'}`}>
               <option value="admin">Admin</option>
               <option value="provider">Provider</option>
               <option value="student">Student</option>
             </select>
+            {errors.role && <span className="text-xs text-red-500 mt-1">{errors.role}</span>}
           </div>
-          {!isView && (
-            <button
-              type="submit"
-              className="w-full py-2 px-4 bg-primary-600 text-white rounded hover:bg-primary-700"
-            >
-              {mode === 'add' ? 'Add User' : 'Save Changes'}
+          <div className="flex items-end gap-2">
+            <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition font-bold">
+              {editingId ? 'Update' : 'Add'}
             </button>
-          )}
+            <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setForm({ role: 'student' }); setErrors({}); }} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition font-bold">Cancel</button>
+          </div>
         </form>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {filteredUsers.map((user, idx) => {
+          const pastel = pastelColors[idx % pastelColors.length];
+          const badge = roleBadge(user.role);
+          return (
+            <div
+              key={user.id}
+              className={`rounded-3xl shadow-lg p-6 flex flex-col items-center gap-3 hover:scale-105 hover:shadow-2xl transition-all duration-300 border-4 ${pastel}`}
+            >
+              <div className="text-5xl mb-2 animate-pulse-slow">{user.emoji || user.name.charAt(0)}</div>
+              <div className="text-lg font-extrabold text-indigo-700 dark:text-indigo-300 mb-1">{user.name}</div>
+              <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 mb-1 ${badge.color}`}>{badge.icon}{user.role}</div>
+              <div className="text-sm text-gray-700 dark:text-gray-200 mb-1">{user.work}</div>
+              <div className="text-xs text-gray-400 mb-3">Age: {user.age}</div>
+              <div className="flex gap-2 mt-auto">
+                <button onClick={() => handleEdit(user)} className="px-3 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition flex items-center gap-1 font-bold"><Edit className="w-4 h-4" /> Edit</button>
+                <button onClick={() => handleDelete(user.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition flex items-center gap-1 font-bold"><Trash2 className="w-4 h-4" /> Delete</button>
+              </div>
+            </div>
+          );
+        })}
       </div>
+      {!users.length && <div className="text-center py-8 text-gray-400 text-xl">No users found. <span>😢</span></div>}
     </div>
   );
 };

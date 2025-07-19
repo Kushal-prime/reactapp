@@ -96,6 +96,17 @@ const ProjectsPage: React.FC = () => {
     setShowModal(false);
   };
 
+  // Helper for status badge
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-blue-100 text-blue-700';
+      case 'completed': return 'bg-green-100 text-green-700';
+      case 'on-hold': return 'bg-yellow-100 text-yellow-700';
+      case 'cancelled': return 'bg-red-100 text-red-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -117,44 +128,41 @@ const ProjectsPage: React.FC = () => {
           className="border border-gray-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
-      <div className="overflow-x-auto bg-white rounded shadow">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded shadow">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm">
+          <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Title</th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Progress</th>
+              <th className="px-6 py-3 text-right text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredProjects.map(project => (
-              <tr key={project.id}>
-                <td className="px-6 py-4 whitespace-nowrap font-medium">{project.title}</td>
-                <td className="px-6 py-4 whitespace-nowrap max-w-xs truncate">{project.description}</td>
-                <td className="px-6 py-4 whitespace-nowrap capitalize">{project.status}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{project.client}</td>
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
+            {filteredProjects.map((project, idx) => (
+              <tr key={project.id} className={`transition-colors ${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'} hover:bg-primary-50 dark:hover:bg-primary-900`}>
+                <td className="px-6 py-4 whitespace-nowrap font-extrabold text-lg text-primary-700 dark:text-primary-300">{project.title}</td>
+                <td className="px-6 py-4 whitespace-nowrap capitalize">
+                  <span className={`px-3 py-1 rounded-full text-sm font-bold shadow-sm ${getStatusBadge(project.status)}`}>{project.status}</span>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="w-32 bg-gray-100 rounded-full h-3">
+                  <div className="w-28 bg-primary-100 dark:bg-primary-900 rounded-full h-4">
                     <div
-                      className={`h-3 rounded-full ${project.progress === 100 ? 'bg-green-500' : 'bg-primary-500'}`}
+                      className={`h-4 rounded-full ${project.progress === 100 ? 'bg-green-500' : 'bg-primary-500'} transition-all duration-700`}
                       style={{ width: `${project.progress}%` }}
                     />
                   </div>
-                  <span className="ml-2 text-xs text-gray-500">{project.progress}%</span>
+                  <span className="ml-2 text-base font-semibold text-primary-700 dark:text-primary-300">{project.progress}%</span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                  <button onClick={() => handleView(project)} className="text-blue-500 hover:text-blue-700"><Eye className="inline w-5 h-5" /></button>
-                  <button onClick={() => handleEdit(project)} className="text-green-500 hover:text-green-700"><Edit className="inline w-5 h-5" /></button>
-                  <button onClick={() => handleDelete(project.id)} className="text-red-500 hover:text-red-700"><Trash2 className="inline w-5 h-5" /></button>
+                  <button onClick={() => handleView(project)} className="text-blue-500 hover:text-blue-700" title="View"><Eye className="inline w-6 h-6" /></button>
+                  <button onClick={() => handleEdit(project)} className="text-green-500 hover:text-green-700" title="Edit"><Edit className="inline w-6 h-6" /></button>
                 </td>
               </tr>
             ))}
             {filteredProjects.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-400">No projects found.</td>
+                <td colSpan={4} className="px-6 py-8 text-center text-gray-400">No projects found.</td>
               </tr>
             )}
           </tbody>
@@ -196,46 +204,46 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ mode, project, onClose, onS
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fade-in">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fade-in">
         <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-2xl">×</button>
-        <h2 className="text-2xl font-bold mb-4 text-primary-700">
+        <h2 className="text-2xl font-bold mb-4 text-primary-700 dark:text-primary-300">
           {mode === 'add' && 'Add Project'}
           {mode === 'edit' && 'Edit Project'}
           {mode === 'view' && 'Project Details'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Title</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
             <input
               type="text"
               name="title"
               value={form.title}
               onChange={handleChange}
               disabled={isView}
-              className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Description</label>
             <textarea
               name="description"
               value={form.description}
               onChange={handleChange}
               disabled={isView}
-              className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               rows={3}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Status</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Status</label>
             <select
               name="status"
               value={form.status}
               onChange={handleChange}
               disabled={isView}
-              className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               required
             >
               <option value="active">Active</option>
@@ -245,19 +253,19 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ mode, project, onClose, onS
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Client</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Client</label>
             <input
               type="text"
               name="client"
               value={form.client}
               onChange={handleChange}
               disabled={isView}
-              className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Progress (%)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Progress</label>
             <input
               type="number"
               name="progress"
@@ -266,17 +274,19 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ mode, project, onClose, onS
               disabled={isView}
               min={0}
               max={100}
-              className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               required
             />
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 mt-2">
+              <div
+                className={`h-3 rounded-full ${form.progress === 100 ? 'bg-green-500' : 'bg-primary-500'} transition-all duration-700`}
+                style={{ width: `${form.progress}%` }}
+              />
+            </div>
+            <span className="ml-2 text-xs text-gray-500 dark:text-gray-300">{form.progress}%</span>
           </div>
           {!isView && (
-            <button
-              type="submit"
-              className="w-full py-2 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-semibold mt-4"
-            >
-              {mode === 'add' ? 'Add Project' : 'Save Changes'}
-            </button>
+            <button type="submit" className="w-full py-2 px-4 bg-primary-600 text-white rounded hover:bg-primary-700 transition">{mode === 'add' ? 'Add Project' : 'Save Changes'}</button>
           )}
         </form>
       </div>

@@ -13,6 +13,8 @@ const Profile: React.FC = () => {
     email: user?.email || '',
     avatar: user?.avatar || '',
     role: user?.role || '',
+    locale: (user as any)?.locale || '',
+    verified_email: (user as any)?.verified_email || false,
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
@@ -28,6 +30,8 @@ const Profile: React.FC = () => {
         email: user.email || '',
         avatar: user.avatar || '',
         role: user.role || '',
+        locale: (user as any)?.locale || '',
+        verified_email: (user as any)?.verified_email || false,
       });
     }
   }, [user, loading, navigate]);
@@ -113,6 +117,30 @@ const Profile: React.FC = () => {
             className="mt-1 block w-full border border-gray-200 rounded-md px-3 py-2 bg-gray-100 text-gray-500"
           />
         </div>
+        {profile.locale && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Locale</label>
+            <input
+              type="text"
+              name="locale"
+              value={profile.locale}
+              disabled
+              className="mt-1 block w-full border border-gray-200 rounded-md px-3 py-2 bg-gray-100 text-gray-500"
+            />
+          </div>
+        )}
+        {typeof profile.verified_email !== 'undefined' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email Verified</label>
+            <input
+              type="text"
+              name="verified_email"
+              value={profile.verified_email ? 'Yes' : 'No'}
+              disabled
+              className="mt-1 block w-full border border-gray-200 rounded-md px-3 py-2 bg-gray-100 text-gray-500"
+            />
+          </div>
+        )}
         <div className="flex space-x-4 mt-6">
           {editMode ? (
             <>

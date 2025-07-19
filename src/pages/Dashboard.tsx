@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   Users, 
   Calendar, 
@@ -8,12 +8,22 @@ import {
   TrendingUp,
   Clock,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  Plus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+
+  // Personalized greeting logic
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return { text: 'Good morning', icon: '☀️' };
+    if (hour < 18) return { text: 'Good afternoon', icon: '⛅' };
+    return { text: 'Good evening', icon: '🌙' };
+  };
+  const greeting = getGreeting();
 
   const stats = [
     { icon: '📁', label: 'Total Projects', value: 12 },
@@ -112,21 +122,70 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Animated stat cards
+  const [animatedStats, setAnimatedStats] = useState(stats.map(s => 0));
+  useEffect(() => {
+    const intervals: NodeJS.Timeout[] = [];
+    stats.forEach((stat, i) => {
+      let start = 0;
+      const end = typeof stat.value === 'number' ? stat.value : parseInt(stat.value.toString().replace(/[^0-9]/g, ''));
+      const duration = 1000;
+      const step = Math.ceil(end / (duration / 16));
+      intervals[i] = setInterval(() => {
+        start += step;
+        setAnimatedStats(prev => {
+          const next = [...prev];
+          next[i] = start >= end ? end : start;
+          return next;
+        });
+        if (start >= end) clearInterval(intervals[i]);
+      }, 16);
+    });
+    return () => intervals.forEach(clearInterval);
+  }, []);
+
+  // Example trend indicators (randomized for demo)
+  const trends = ['up', 'down', 'up', 'up'];
+  const trendPercents = ['+5%', '-2%', '+8%', '+1%'];
+
+  // Recent activity feed (demo data)
+  const recentActivity = [
+    { icon: '✅', text: 'Task "Design user interface mockups" completed by Sarah Johnson', time: '2 min ago' },
+    { icon: '🆕', text: 'New client "Acme Corp" added', time: '10 min ago' },
+    { icon: '🚀', text: 'Project "Mobile App Development" launched', time: '1 hour ago' },
+    { icon: '✏️', text: 'Profile updated', time: 'Yesterday' },
+  ];
+
+  // Floating quick action button state
+  const [fabOpen, setFabOpen] = useState(false);
+
   return (
     <div className="space-y-10">
       {/* Welcome Section */}
-      <div className="bg-white rounded-3xl shadow p-8 flex flex-col items-center">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-2 text-center drop-shadow-lg flex items-center gap-3">
-          <span>👋</span> Welcome back, {user?.name || 'User'}!
-        </h1>
-        <p className="text-lg text-gray-600 mb-2 text-center max-w-2xl">Here’s a quick overview of your projects, team, and tasks. Manage everything in one place!</p>
+      <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl shadow-xl p-10 flex flex-col items-center text-white relative overflow-hidden">
+        <div className="absolute right-0 top-0 opacity-20 w-64 h-64 bg-white rounded-full blur-3xl" style={{zIndex:0}}></div>
+        <div className="flex flex-col items-center z-10">
+          <div className="text-2xl font-semibold text-white mb-4 text-center">
+            {greeting.text}, {user?.name?.split(' ')[0] || 'User'}!
+          </div>
+          <div className="flex gap-4 mt-2">
+            <a href="/dashboard/projects" className="px-5 py-2 bg-white bg-opacity-20 rounded-lg font-semibold shadow hover:bg-opacity-40 transition-all duration-150">Add Project</a>
+            <a href="/dashboard/tasks" className="px-5 py-2 bg-white bg-opacity-20 rounded-lg font-semibold shadow hover:bg-opacity-40 transition-all duration-150">Add Task</a>
+            <a href="/dashboard/clients" className="px-5 py-2 bg-white bg-opacity-20 rounded-lg font-semibold shadow hover:bg-opacity-40 transition-all duration-150">Add Client</a>
+          </div>
+        </div>
       </div>
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full">
-        {stats.map((stat) => (
-          <div key={stat.label} className="flex flex-col items-center bg-white rounded-xl shadow p-6 border border-gray-100">
-            <div className="text-3xl mb-2">{stat.icon}</div>
-            <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+        {stats.map((stat, i) => (
+          <div key={stat.label} className="flex flex-col items-center bg-gradient-to-br from-white via-blue-50 to-purple-100 rounded-2xl shadow-lg p-6 border border-gray-100 hover:scale-105 hover:shadow-2xl transition-transform duration-200 group">
+            <div className="text-4xl mb-2 group-hover:scale-125 transition-transform">{stat.icon}</div>
+            <div className="flex items-center gap-2">
+              <div className="text-2xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+                {typeof stat.value === 'number' ? animatedStats[i] : stat.value}
+              </div>
+              <span className={`text-xs font-semibold ${trends[i]==='up' ? 'text-green-600' : 'text-red-600'}`}>{trendPercents[i]} {trends[i]==='up' ? '▲' : '▼'}</span>
+            </div>
             <div className="text-gray-500 text-sm mt-1">{stat.label}</div>
           </div>
         ))}
@@ -134,18 +193,42 @@ const Dashboard: React.FC = () => {
       {/* Feature Sections */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full">
         {sections.map((section) => (
-          <div key={section.title} className="flex flex-col bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:scale-105 hover:shadow-xl transition-transform duration-200 group">
+          <a key={section.title} href={section.link} className="flex flex-col bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:scale-105 hover:shadow-xl transition-transform duration-200 group cursor-pointer">
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl">{section.icon}</span>
-              <span className="text-xl font-bold text-gray-800">{section.title}</span>
+              <span className="text-3xl group-hover:scale-125 transition-transform">{section.icon}</span>
+              <span className="text-xl font-bold text-gray-800 group-hover:text-primary-600 transition-colors">{section.title}</span>
             </div>
             <div className="text-2xl font-extrabold text-primary-600 mb-1">{section.stat}</div>
             <div className="text-gray-500 mb-4">{section.desc}</div>
-            <a href={section.link} className="mt-auto self-start flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold shadow hover:bg-primary-700 hover:scale-105 transition-all duration-150">
+            <span className="mt-auto self-start flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold shadow hover:bg-primary-700 hover:scale-105 transition-all duration-150">
               View All <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
+            </span>
+          </a>
         ))}
+        {/* Clients Section Placeholder */}
+        <a href="/dashboard/clients" className="flex flex-col bg-gradient-to-br from-green-50 via-green-100 to-green-200 rounded-2xl shadow-lg p-6 border border-gray-100 hover:scale-105 hover:shadow-xl transition-transform duration-200 group cursor-pointer">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-3xl group-hover:scale-125 transition-transform">💼</span>
+            <span className="text-xl font-bold text-gray-800 group-hover:text-green-700 transition-colors">Clients</span>
+          </div>
+          <div className="text-2xl font-extrabold text-green-700 mb-1">Coming Soon</div>
+          <div className="text-gray-500 mb-4">Manage your clients and their details here.</div>
+          <span className="mt-auto self-start flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold shadow hover:bg-green-700 hover:scale-105 transition-all duration-150">
+            View All <ArrowRight className="w-4 h-4" />
+          </span>
+        </a>
+        {/* Tasks Section Placeholder */}
+        <a href="/dashboard/tasks" className="flex flex-col bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 rounded-2xl shadow-lg p-6 border border-gray-100 hover:scale-105 hover:shadow-xl transition-transform duration-200 group cursor-pointer">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-3xl group-hover:scale-125 transition-transform">🗂️</span>
+            <span className="text-xl font-bold text-gray-800 group-hover:text-yellow-700 transition-colors">Tasks</span>
+          </div>
+          <div className="text-2xl font-extrabold text-yellow-700 mb-1">Coming Soon</div>
+          <div className="text-gray-500 mb-4">Track and manage your tasks efficiently.</div>
+          <span className="mt-auto self-start flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg font-semibold shadow hover:bg-yellow-700 hover:scale-105 transition-all duration-150">
+            View All <ArrowRight className="w-4 h-4" />
+          </span>
+        </a>
       </div>
       {/* Recent Projects & Tasks */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
@@ -181,6 +264,38 @@ const Dashboard: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+      {/* Recent Activity Feed */}
+      <div className="bg-white rounded-2xl shadow p-6 border border-gray-100 mt-8">
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">🕒 Recent Activity</h2>
+        <ul className="space-y-3">
+          {recentActivity.map((activity, idx) => (
+            <li key={idx} className="flex items-center gap-3">
+              <span className="text-2xl">{activity.icon}</span>
+              <span className="flex-1 text-gray-700">{activity.text}</span>
+              <span className="text-xs text-gray-400">{activity.time}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      {/* Floating Quick Action Button */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <div className="relative flex flex-col items-end">
+          {fabOpen && (
+            <div className="mb-2 flex flex-col gap-2 animate-fade-in">
+              <a href="/dashboard/projects" className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">Add Project</a>
+              <a href="/dashboard/tasks" className="px-4 py-2 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 transition">Add Task</a>
+              <a href="/dashboard/clients" className="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">Add Client</a>
+            </div>
+          )}
+          <button
+            onClick={() => setFabOpen(fab => !fab)}
+            className={`w-14 h-14 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-lg hover:bg-primary-700 transition-all duration-200 text-3xl focus:outline-none ${fabOpen ? 'rotate-45' : ''}`}
+            aria-label="Quick actions"
+          >
+            <Plus className="w-8 h-8 transition-transform duration-200" style={{transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)'}} />
+          </button>
         </div>
       </div>
     </div>

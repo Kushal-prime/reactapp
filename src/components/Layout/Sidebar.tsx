@@ -10,7 +10,9 @@ import {
   Settings,
   LogOut,
   Calendar,
-  Users
+  Users,
+  UserPlus,
+  CheckSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -25,6 +27,8 @@ const Sidebar: React.FC = () => {
     { name: 'Updates', href: '/dashboard/updates', icon: FileText },
     { name: 'Deliverables', href: '/dashboard/deliverables', icon: Upload },
     { name: 'Tickets', href: '/dashboard/tickets', icon: MessageSquare },
+    { name: 'Clients', href: '/dashboard/clients', icon: UserPlus },
+    { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
     { name: 'Users', href: '/dashboard/users', icon: Users },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];

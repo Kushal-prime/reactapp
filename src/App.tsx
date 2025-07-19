@@ -12,6 +12,8 @@ import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
+import Clients from './pages/Clients';
+import Tasks from './pages/Tasks';
 import './App.css';
 
 function App() {
@@ -30,6 +32,8 @@ function App() {
           <Route path="deliverables" element={<Deliverables />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="clients" element={<Clients />} />
+          <Route path="tasks" element={<Tasks />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

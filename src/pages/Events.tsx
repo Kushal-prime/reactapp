@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Event } from '../types';
 import { useToast } from '../components/Layout/Layout';
+import { useEffect } from 'react';
 
 const Events: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([
@@ -120,6 +121,17 @@ const Events: React.FC = () => {
     expiresAt: '',
   });
 
+  // Add modal state for event details
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+
+  // Helper: get all images for an event (simulate multiple images)
+  const getEventImages = (event: Event) => {
+    if (Array.isArray(event.image)) return event.image;
+    // Simulate multiple images if only one is provided
+    return [event.image, event.image + '&2', event.image + '&3'];
+  };
+
   const handleCreateEvent = (e: React.FormEvent) => {
     e.preventDefault();
     setEvents([
@@ -224,69 +236,39 @@ const Events: React.FC = () => {
       </div>
 
       {/* Events Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEvents.map((event) => (
-          <div key={event.id} className="bg-white rounded-lg shadow overflow-hidden">
+          <div key={event.id} className="bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition-shadow group overflow-hidden flex flex-col">
             <div className="relative">
               <img
                 src={event.image}
                 alt={event.title}
-                className="w-full h-48 object-cover"
+                className="w-full h-44 object-cover group-hover:brightness-90 transition"
               />
-              <div className="absolute top-4 left-4">
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(event.type)}`}>
-                  {event.type}
-                </span>
+              <div className="absolute top-3 left-3 flex gap-2">
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(event.type)}`}>{event.type}</span>
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(event.status)}`}>{event.status}</span>
               </div>
-              <div className="absolute top-4 right-4">
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(event.status)}`}>
-                  {event.status}
-                </span>
+              <div className="absolute bottom-3 left-3 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow">
+                {event.date}
               </div>
             </div>
-            
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{event.title}</h3>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{event.description}</p>
-              
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center text-sm text-gray-500">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {new Date(event.date).toLocaleDateString()}
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  <Clock className="h-4 w-4 mr-2" />
-                  {event.time} • {event.duration}
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  {event.online ? (
-                    <Globe className="h-4 w-4 mr-2" />
-                  ) : (
-                    <MapPin className="h-4 w-4 mr-2" />
-                  )}
-                  {event.location}
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  <Users className="h-4 w-4 mr-2" />
-                  {event.currentParticipants}/{event.maxParticipants} participants
-                </div>
+            <div className="flex-1 flex flex-col p-5">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate">{event.title}</h3>
+              <div className="flex items-center text-xs text-gray-500 dark:text-gray-300 mb-2 gap-2">
+                <span>{event.location}</span>
+                <span>•</span>
+                <span>{event.time}</span>
               </div>
-
-              <div className="flex items-center justify-between">
-                <div className="text-lg font-semibold text-gray-900">
-                  {event.price === 0 ? 'Free' : `$${event.price}`}
-                </div>
-                <div className="flex space-x-2">
-                  <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
-                    <Eye className="h-4 w-4" />
-                  </button>
-                  <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
-                    <Edit className="h-4 w-4" />
-                  </button>
-                  <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{event.description}</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {event.tags.map(tag => (
+                  <span key={tag} className="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-200 rounded-full text-xs font-medium">{tag}</span>
+                ))}
+              </div>
+              <div className="mt-auto flex gap-2">
+                <button className="flex-1 px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition">View</button>
+                <button className="flex-1 px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">Join</button>
               </div>
             </div>
           </div>

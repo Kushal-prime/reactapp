@@ -114,63 +114,72 @@ const TicketsPage: React.FC = () => {
           className="border border-gray-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
-      <div className="overflow-x-auto bg-white rounded-2xl shadow-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-2xl shadow-lg">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm">
+          <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Title</th>
-              <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Description</th>
-              <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Priority</th>
-              <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Assigned To</th>
-              <th className="px-8 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-8 py-4 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Title</th>
+              <th className="px-8 py-4 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Status</th>
+              <th className="px-8 py-4 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Priority</th>
+              <th className="px-8 py-4 text-left text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Assigned To</th>
+              <th className="px-8 py-4 text-right text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredTickets.map(ticket => (
-              <tr key={ticket.id} className="group hover:bg-primary-50 transition border-l-4" style={{ borderColor: ticket.status === 'resolved' ? '#22c55e' : ticket.status === 'in-progress' ? '#eab308' : ticket.status === 'open' ? '#3b82f6' : '#a1a1aa' }}>
-                <td className="px-8 py-5 whitespace-nowrap font-medium text-base">{ticket.title}</td>
-                <td className="px-8 py-5 whitespace-normal break-words max-w-lg text-base">{ticket.description}</td>
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
+            {filteredTickets.map((ticket, idx) => (
+              <tr
+                key={ticket.id}
+                className={`group hover:bg-primary-50 dark:hover:bg-primary-900 transition border-l-4 ${
+                  ticket.priority === 'urgent'
+                    ? 'border-red-500'
+                    : ticket.priority === 'high'
+                    ? 'border-orange-400'
+                    : ticket.priority === 'medium'
+                    ? 'border-yellow-400'
+                    : 'border-gray-300'
+                } ${idx % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}
+              >
+                <td className="px-8 py-5 whitespace-nowrap font-extrabold text-lg text-primary-700 dark:text-primary-300">{ticket.title}</td>
                 <td className="px-8 py-5 whitespace-nowrap capitalize flex items-center gap-2">
                   {ticket.status === 'resolved' && <CheckCircle className="w-4 h-4 text-green-500" />}
                   {ticket.status === 'in-progress' && <AlertTriangle className="w-4 h-4 text-yellow-500" />}
                   {ticket.status === 'open' && <Info className="w-4 h-4 text-blue-500" />}
                   {ticket.status === 'closed' && <XCircle className="w-4 h-4 text-gray-400" />}
-                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                    ticket.status === 'open' ? 'bg-blue-100 text-blue-700' :
-                    ticket.status === 'in-progress' ? 'bg-yellow-100 text-yellow-700' :
-                    ticket.status === 'resolved' ? 'bg-green-100 text-green-700' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>
-                    {ticket.status}
-                  </span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-bold shadow-sm ${
+                    ticket.status === 'open'
+                      ? 'bg-blue-100 text-blue-700'
+                      : ticket.status === 'in-progress'
+                      ? 'bg-yellow-100 text-yellow-700'
+                      : ticket.status === 'resolved'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>{ticket.status}</span>
                 </td>
                 <td className="px-8 py-5 whitespace-nowrap capitalize flex items-center gap-2">
                   {ticket.priority === 'urgent' && <XCircle className="w-4 h-4 text-red-500" />}
                   {ticket.priority === 'high' && <AlertTriangle className="w-4 h-4 text-orange-500" />}
                   {ticket.priority === 'medium' && <Info className="w-4 h-4 text-yellow-500" />}
                   {ticket.priority === 'low' && <CheckCircle className="w-4 h-4 text-green-500" />}
-                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                    ticket.priority === 'urgent' ? 'bg-red-100 text-red-700' :
-                    ticket.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                    ticket.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>
-                    {ticket.priority}
-                  </span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-bold shadow-sm ${
+                    ticket.priority === 'urgent'
+                      ? 'bg-red-100 text-red-700'
+                      : ticket.priority === 'high'
+                      ? 'bg-orange-100 text-orange-700'
+                      : ticket.priority === 'medium'
+                      ? 'bg-yellow-100 text-yellow-700'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>{ticket.priority}</span>
                 </td>
-                <td className="px-8 py-5 whitespace-nowrap text-base">{ticket.assignedTo || 'Unassigned'}</td>
+                <td className="px-8 py-5 whitespace-nowrap text-base text-gray-700 dark:text-gray-200">{ticket.assignedTo || 'Unassigned'}</td>
                 <td className="px-8 py-5 whitespace-nowrap text-right space-x-2">
-                  <button onClick={() => handleView(ticket)} className="text-blue-500 hover:text-blue-700"><Eye className="inline w-5 h-5" /></button>
-                  <button onClick={() => handleEdit(ticket)} className="text-green-500 hover:text-green-700"><Edit className="inline w-5 h-5" /></button>
-                  <button onClick={() => handleDelete(ticket.id)} className="text-red-500 hover:text-red-700"><Trash2 className="inline w-5 h-5" /></button>
-                  <button className="ml-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-lg font-semibold opacity-0 group-hover:opacity-100 transition">View Details</button>
+                  <button onClick={() => handleView(ticket)} className="text-blue-500 hover:text-blue-700" title="View"><Eye className="inline w-6 h-6" /></button>
+                  <button onClick={() => handleEdit(ticket)} className="text-green-500 hover:text-green-700" title="Edit"><Edit className="inline w-6 h-6" /></button>
                 </td>
               </tr>
             ))}
             {filteredTickets.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-8 py-20 text-center text-gray-400">
+                <td colSpan={5} className="px-8 py-20 text-center text-gray-400">
                   <div className="flex flex-col items-center gap-2">
                     <MessageSquare className="w-10 h-10 text-primary-300 mb-2" />
                     <span className="text-lg font-semibold">No tickets found</span>
