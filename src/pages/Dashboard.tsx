@@ -9,9 +9,12 @@ import {
   Clock,
   CheckCircle,
   ArrowRight,
-  Plus
+  Plus,
+  User as UserIcon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useSpring, animated } from 'react-spring';
+import Confetti from 'react-confetti';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -144,6 +147,27 @@ const Dashboard: React.FC = () => {
     return () => intervals.forEach(clearInterval);
   }, []);
 
+  // Animated counters with react-spring
+  // const animatedStatSprings = stats.map((stat, i) => {
+  //   const end = typeof stat.value === 'number' ? stat.value : parseInt(stat.value.toString().replace(/[^0-9]/g, ''));
+  //   return useSpring({
+  //     from: { val: 0 },
+  //     to: { val: end },
+  //     config: { mass: 1, tension: 120, friction: 20 },
+  //     delay: 300 + i * 200,
+  //   });
+  // });
+  // Section reveal on scroll
+  const [reveal, setReveal] = useState(false);
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 100) setReveal(true);
+      else setReveal(false);
+    };
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   // Example trend indicators (randomized for demo)
   const trends = ['up', 'down', 'up', 'up'];
   const trendPercents = ['+5%', '-2%', '+8%', '+1%'];
@@ -159,50 +183,165 @@ const Dashboard: React.FC = () => {
   // Floating quick action button state
   const [fabOpen, setFabOpen] = useState(false);
 
+  const typewriterGreetings = [
+    `Welcome, ${user?.name?.split(' ')[0] || 'User'}!`,
+    'Your Project Hub 🚀',
+    'Track, Manage, Succeed!',
+    'Let’s get productive!'
+  ];
+
+  // Typewriter greeting effect
+  const [greetIdx, setGreetIdx] = useState(0);
+  const [greetDisplay, setGreetDisplay] = useState('');
+  const [greetChar, setGreetChar] = useState(0);
+  useEffect(() => {
+    if (greetChar < typewriterGreetings[greetIdx].length) {
+      const timeout = setTimeout(() => {
+        setGreetDisplay(typewriterGreetings[greetIdx].slice(0, greetChar + 1));
+        setGreetChar(greetChar + 1);
+      }, 60);
+      return () => clearTimeout(timeout);
+    } else {
+      const timeout = setTimeout(() => {
+        setGreetChar(0);
+        setGreetIdx((greetIdx + 1) % typewriterGreetings.length);
+        setGreetDisplay('');
+      }, 1200);
+      return () => clearTimeout(timeout);
+    }
+  }, [greetChar, greetIdx]);
+
+  // Typewriter for section titles
+  const [sectionTypeIdx, setSectionTypeIdx] = useState(0);
+  const [sectionTypeChar, setSectionTypeChar] = useState(0);
+  const [sectionTypeDisplay, setSectionTypeDisplay] = useState('');
+  const [sectionTypeActive, setSectionTypeActive] = useState(0);
+  useEffect(() => {
+    if (sectionTypeChar < sections[sectionTypeActive]?.title.length) {
+      const timeout = setTimeout(() => {
+        setSectionTypeDisplay(sections[sectionTypeActive].title.slice(0, sectionTypeChar + 1));
+        setSectionTypeChar(sectionTypeChar + 1);
+      }, 40);
+      return () => clearTimeout(timeout);
+    }
+  }, [sectionTypeChar, sectionTypeActive, sections]);
+  useEffect(() => {
+    setSectionTypeChar(0);
+    setSectionTypeDisplay('');
+  }, [sectionTypeActive]);
+  // Confetti for section click
+  const [confettiSection, setConfettiSection] = useState<number|null>(null);
+
   return (
-    <div className="space-y-10">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl shadow-xl p-10 flex flex-col items-center text-white relative overflow-hidden">
-        <div className="absolute right-0 top-0 opacity-20 w-64 h-64 bg-white rounded-full blur-3xl" style={{zIndex:0}}></div>
-        <div className="flex flex-col items-center z-10">
-          <div className="text-2xl font-semibold text-white mb-4 text-center">
-            {greeting.text}, {user?.name?.split(' ')[0] || 'User'}!
+    <div className="space-y-10 min-h-screen bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100 relative overflow-hidden">
+      {/* Animated Morphing Blobs */}
+      <svg className="absolute top-0 left-0 w-96 h-96 opacity-30 animate-blob-morph -z-10" viewBox="0 0 400 400" fill="none"><defs><linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#a5b4fc"/><stop offset="100%" stopColor="#fbcfe8"/></linearGradient></defs><path d="M300,200Q300,300,200,350Q100,300,100,200Q100,100,200,50Q300,100,300,200Z" fill="url(#grad1)"/></svg>
+      <svg className="absolute bottom-0 right-0 w-96 h-96 opacity-30 animate-blob-morph -z-10" viewBox="0 0 400 400" fill="none"><defs><linearGradient id="grad2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#fbcfe8"/><stop offset="100%" stopColor="#a5b4fc"/></linearGradient></defs><path d="M300,200Q350,300,200,350Q50,300,100,200Q50,100,200,50Q350,100,300,200Z" fill="url(#grad2)"/></svg>
+      {/* Welcome Section - Redesigned */}
+      <div className="relative flex flex-col items-center justify-center min-h-[340px] w-full bg-gradient-to-br from-white/80 via-blue-50/80 to-pink-50/80 dark:from-gray-900/80 dark:via-blue-900/80 dark:to-pink-900/80 rounded-3xl shadow-2xl border-2 border-white/40 dark:border-gray-800/40 overflow-hidden animate-fade-in">
+        {/* Animated floating shapes */}
+        <div className="absolute -top-10 -left-10 w-40 h-40 bg-pink-200 rounded-full opacity-30 blur-2xl animate-blob -z-10" />
+        <div className="absolute -bottom-12 right-10 w-56 h-56 bg-blue-200 rounded-full opacity-30 blur-2xl animate-blob2 -z-10" />
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-100 rounded-full opacity-20 blur-3xl animate-blob3 -z-10" style={{ transform: 'translate(-50%, -50%)' }} />
+        <div className="flex flex-col items-center z-10 w-full">
+          {/* Avatar and Greeting */}
+          <div className="flex flex-col items-center mb-4">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 via-pink-400 to-purple-400 flex items-center justify-center shadow-lg mb-2 animate-pop-in">
+              {user?.avatar ? (
+                <img src={user.avatar} alt="avatar" className="w-20 h-20 rounded-full object-cover" />
+              ) : (
+                <UserIcon className="w-12 h-12 text-white" />
+              )}
+            </div>
+            <div className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent text-center drop-shadow-lg animate-gradient-x min-h-[48px]">
+              {greetDisplay}
+              <span className="w-2 h-8 bg-pink-500 animate-blink inline-block ml-1 align-middle rounded" />
+            </div>
+            <div className="text-lg text-gray-500 dark:text-gray-300 mt-2 animate-fade-in-up">Let’s build something amazing today! 🚀</div>
           </div>
-          <div className="flex gap-4 mt-2">
-            <a href="/dashboard/projects" className="px-5 py-2 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-300 text-white rounded-lg font-semibold shadow hover:from-blue-600 hover:to-blue-400 hover:scale-105 transition-all duration-150">Add Project</a>
-            <a href="/dashboard/tasks" className="px-5 py-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-300 text-white rounded-lg font-semibold shadow hover:from-yellow-500 hover:to-orange-500 hover:scale-105 transition-all duration-150">Add Task</a>
-            <a href="/dashboard/clients" className="px-5 py-2 bg-gradient-to-r from-green-500 via-green-400 to-green-300 text-white rounded-lg font-semibold shadow hover:from-green-600 hover:to-green-400 hover:scale-105 transition-all duration-150">Add Client</a>
+          {/* Quick Actions */}
+          <div className="flex flex-col items-center gap-2 w-full mt-4">
+            <div className="text-sm font-semibold text-gray-400 mb-1 animate-fade-in-up">Quick Actions</div>
+            <div className="flex gap-4">
+              <a href="/dashboard/projects" className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 via-teal-400 to-blue-300 text-white rounded-xl font-bold shadow hover:from-blue-600 hover:to-teal-400 hover:scale-105 transition-all duration-150 animate-pop-in"><FolderOpen className="w-5 h-5" /> Add Project</a>
+              <a href="/dashboard/tasks" className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-400 via-purple-400 to-yellow-300 text-white rounded-xl font-bold shadow hover:from-pink-500 hover:to-yellow-400 hover:scale-105 transition-all duration-150 animate-pop-in"><TrendingUp className="w-5 h-5" /> Add Task</a>
+              <a href="/dashboard/clients" className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 via-teal-400 to-blue-300 text-white rounded-xl font-bold shadow hover:from-green-600 hover:to-teal-400 hover:scale-105 transition-all duration-150 animate-pop-in"><Users className="w-5 h-5" /> Add Client</a>
+            </div>
+          </div>
+          {/* Quick Stats or Recent Activity */}
+          <div className="mt-8 w-full max-w-2xl animate-fade-in-up">
+            <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
+              <div className="flex flex-col items-center bg-white/80 dark:bg-gray-800/80 rounded-xl shadow p-4 min-w-[120px]">
+                <div className="text-2xl font-bold text-blue-600">{stats[0].value}</div>
+                <div className="text-xs text-gray-500">Projects</div>
+              </div>
+              <div className="flex flex-col items-center bg-white/80 dark:bg-gray-800/80 rounded-xl shadow p-4 min-w-[120px]">
+                <div className="text-2xl font-bold text-pink-600">{stats[1].value}</div>
+                <div className="text-xs text-gray-500">Active</div>
+              </div>
+              <div className="flex flex-col items-center bg-white/80 dark:bg-gray-800/80 rounded-xl shadow p-4 min-w-[120px]">
+                <div className="text-2xl font-bold text-green-600">{stats[3].value}</div>
+                <div className="text-xs text-gray-500">Team</div>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-400 text-center">Tip: Use the quick actions above to get started fast!</div>
           </div>
         </div>
       </div>
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full">
+      {/* Stat Cards with tilt and animated counters */}
+      <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full transition-all duration-700 ${reveal ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}> 
         {stats.map((stat, i) => (
-          <div key={stat.label} className="flex flex-col items-center bg-gradient-to-br from-white via-blue-50 to-purple-100 rounded-2xl shadow-lg p-6 border border-gray-100 hover:scale-105 hover:shadow-2xl transition-transform duration-200 group">
-            <div className="text-4xl mb-2 group-hover:scale-125 transition-transform">{stat.icon}</div>
-            <div className="flex items-center gap-2">
-              <div className="text-2xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
-                {typeof stat.value === 'number' ? animatedStats[i] : stat.value}
-              </div>
-              <span className={`text-xs font-semibold ${trends[i]==='up' ? 'text-green-600' : 'text-red-600'}`}>{trendPercents[i]} {trends[i]==='up' ? '▲' : '▼'}</span>
-            </div>
-            <div className="text-gray-500 text-sm mt-1">{stat.label}</div>
-          </div>
+          <AnimatedStatCard
+            key={stat.label}
+            stat={stat}
+            trend={trends[i]}
+            trendPercent={trendPercents[i]}
+            delay={300 + i * 200}
+          />
         ))}
       </div>
       {/* Feature Sections */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full">
-        {sections.map((section) => (
-          <a key={section.title} href={section.link} className="flex flex-col bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:scale-105 hover:shadow-xl transition-transform duration-200 group cursor-pointer">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl group-hover:scale-125 transition-transform">{section.icon}</span>
-              <span className="text-xl font-bold text-gray-800 group-hover:text-primary-600 transition-colors">{section.title}</span>
+        {sections.map((section, i) => {
+          let bg = '';
+          if (section.title === 'Events') bg = 'bg-gradient-to-br from-blue-200 via-blue-100 to-white dark:from-blue-900 dark:via-blue-800 dark:to-gray-900';
+          else if (section.title === 'Tickets') bg = 'bg-gradient-to-br from-pink-200 via-pink-100 to-white dark:from-pink-900 dark:via-pink-800 dark:to-gray-900';
+          else if (section.title === 'Deliverables') bg = 'bg-gradient-to-br from-purple-200 via-purple-100 to-white dark:from-purple-900 dark:via-purple-800 dark:to-gray-900';
+          else if (section.title === 'Users') bg = 'bg-gradient-to-br from-yellow-200 via-yellow-100 to-white dark:from-yellow-900 dark:via-yellow-800 dark:to-gray-900';
+          else if (section.title === 'Updates') bg = 'bg-gradient-to-br from-teal-200 via-teal-100 to-white dark:from-teal-900 dark:via-teal-800 dark:to-gray-900';
+          else bg = 'bg-gradient-to-br from-white via-blue-50 to-pink-50 dark:from-gray-900 dark:via-blue-900 dark:to-pink-900';
+          const isActive = sectionTypeActive === i;
+          return (
+            <div key={section.title} className="relative">
+              {confettiSection === i && <Confetti width={300} height={200} recycle={false} numberOfPieces={120} style={{position:'absolute',top:0,left:0,pointerEvents:'none',zIndex:20}} />}
+              <a
+                href={section.link}
+                className={`flex flex-col ${bg} rounded-2xl shadow-xl p-6 border-4 border-transparent hover:border-pink-400 dark:hover:border-pink-600 hover:shadow-pink-200 dark:hover:shadow-pink-900 transition-transform duration-200 group cursor-pointer animate-fade-in-up relative overflow-hidden`}
+                onMouseEnter={() => setSectionTypeActive(i)}
+                onClick={e => { setConfettiSection(i); setTimeout(() => setConfettiSection(null), 1200); }}
+                style={{ minHeight: 180 }}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-3xl group-hover:scale-125 transition-transform animate-bounce">{section.icon}</span>
+                  <span className="text-xl font-extrabold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent animate-gradient-x group-hover:scale-110 transition-transform">
+                    {isActive ? (
+                      <>
+                        {sectionTypeDisplay}
+                        <span className="w-1 h-6 bg-pink-400 inline-block ml-1 align-middle animate-blink rounded" />
+                      </>
+                    ) : section.title}
+                  </span>
+                  {section.title === 'Updates' && <span className="ml-2 px-2 py-0.5 bg-pink-500 text-white text-xs font-bold rounded-full animate-pulse">New</span>}
+                </div>
+                <div className="text-2xl font-extrabold text-primary-600 mb-1 animate-count-up">{section.stat}</div>
+                <div className="text-gray-500 mb-4 animate-fade-in-up">{section.desc}</div>
+                <span className={`mt-auto self-start flex items-center gap-2 px-4 py-2 rounded-lg font-semibold shadow hover:scale-110 transition-all duration-150 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 text-white animate-pop-in`}>
+                  View All <ArrowRight className="w-4 h-4" />
+                </span>
+              </a>
             </div>
-            <div className="text-2xl font-extrabold text-primary-600 mb-1">{section.stat}</div>
-            <div className="text-gray-500 mb-4">{section.desc}</div>
-            <span className={`mt-auto self-start flex items-center gap-2 px-4 py-2 rounded-lg font-semibold shadow hover:scale-105 transition-all duration-150 ${section.title === 'Events' ? 'bg-blue-600 hover:bg-blue-700 text-white' : section.title === 'Tickets' ? 'bg-pink-600 hover:bg-pink-700 text-white' : section.title === 'Deliverables' ? 'bg-purple-600 hover:bg-purple-700 text-white' : section.title === 'Users' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-800'}`}>View All <ArrowRight className="w-4 h-4" /></span>
-          </a>
-        ))}
+          );
+        })}
         {/* Clients Section Card */}
         <a href="/dashboard/clients" className="flex flex-col bg-gradient-to-br from-green-200 via-green-300 to-green-400 dark:from-green-900 dark:via-green-800 dark:to-green-700 rounded-2xl shadow-xl p-6 border-4 border-green-300 hover:scale-105 hover:shadow-2xl hover:border-green-500 transition-transform duration-200 group cursor-pointer animate-fade-in">
           <div className="flex items-center gap-3 mb-2">
@@ -229,16 +368,16 @@ const Dashboard: React.FC = () => {
       {/* Recent Projects & Tasks */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
         {/* Recent Projects */}
-        <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
+        <div className="bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-xl p-6 border-2 border-white/40 dark:border-gray-800/40 animate-fade-in-up">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">📈 Recent Projects</h2>
           <div className="space-y-4">
             {recentProjects.map((proj) => (
-              <div key={proj.title} className="mb-2">
+              <div key={proj.title} className="mb-2 animate-pop-in hover:scale-105 hover:shadow-lg transition-transform duration-200 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900 rounded-xl p-4">
                 <div className="flex justify-between items-center">
-                  <div className="font-semibold text-gray-800">{proj.title}</div>
+                  <div className="font-semibold text-gray-800 dark:text-white">{proj.title}</div>
                   <div className="text-xs text-gray-500">{proj.client}</div>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-3 mt-2">
+                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 mt-2">
                   <div className="h-3 rounded-full bg-primary-500" style={{ width: `${proj.progress}%` }} />
                 </div>
                 <div className="text-xs text-gray-500 mt-1">{proj.progress}% complete</div>
@@ -247,12 +386,12 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         {/* Recent Tasks */}
-        <div className="bg-white rounded-2xl shadow p-6 border border-gray-100">
+        <div className="bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-xl p-6 border-2 border-white/40 dark:border-gray-800/40 animate-fade-in-up">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">✅ Recent Tasks</h2>
           <div className="space-y-4">
             {recentTasks.map((task) => (
-              <div key={task.title} className="mb-2">
-                <div className="font-semibold text-gray-800">{task.title}</div>
+              <div key={task.title} className="mb-2 animate-pop-in hover:scale-105 hover:shadow-lg transition-transform duration-200 bg-gradient-to-r from-pink-50 to-yellow-50 dark:from-pink-900 dark:to-yellow-900 rounded-xl p-4">
+                <div className="font-semibold text-gray-800 dark:text-white">{task.title}</div>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                   Assigned to {task.assignee}
                   <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-semibold ${statusColor(task.status)}`}>{task.status}</span>
@@ -263,13 +402,13 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
       {/* Recent Activity Feed */}
-      <div className="bg-white rounded-2xl shadow p-6 border border-gray-100 mt-8">
+      <div className="bg-white/90 dark:bg-gray-900/90 rounded-2xl shadow-xl p-6 border-2 border-white/40 dark:border-gray-800/40 mt-8 animate-fade-in-up">
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">🕒 Recent Activity</h2>
         <ul className="space-y-3">
           {recentActivity.map((activity, idx) => (
-            <li key={idx} className="flex items-center gap-3">
+            <li key={idx} className="flex items-center gap-3 animate-pop-in hover:scale-105 hover:bg-blue-50 dark:hover:bg-blue-900 transition-transform duration-200 rounded-xl p-2">
               <span className="text-2xl">{activity.icon}</span>
-              <span className="flex-1 text-gray-700">{activity.text}</span>
+              <span className="flex-1 text-gray-700 dark:text-white">{activity.text}</span>
               <span className="text-xs text-gray-400">{activity.time}</span>
             </li>
           ))}
@@ -287,7 +426,7 @@ const Dashboard: React.FC = () => {
           )}
           <button
             onClick={() => setFabOpen(fab => !fab)}
-            className={`w-14 h-14 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-lg hover:bg-primary-700 transition-all duration-200 text-3xl focus:outline-none ${fabOpen ? 'rotate-45' : ''}`}
+            className={`w-14 h-14 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-lg hover:bg-primary-700 transition-all duration-200 text-3xl focus:outline-none ${fabOpen ? 'rotate-45' : ''} animate-bounce-slow`}
             aria-label="Quick actions"
           >
             <Plus className="w-8 h-8 transition-transform duration-200" style={{transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)'}} />
@@ -295,6 +434,34 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// AnimatedStatCard child component
+const AnimatedStatCard = ({ stat, trend, trendPercent, delay }: { stat: any, trend: string, trendPercent: string, delay: number }) => {
+  const end = typeof stat.value === 'number' ? stat.value : parseInt(stat.value.toString().replace(/[^0-9]/g, ''));
+  const spring = useSpring({
+    from: { val: 0 },
+    to: { val: end },
+    config: { mass: 1, tension: 120, friction: 20 },
+    delay,
+  });
+  return (
+    <animated.div
+      className="flex flex-col items-center bg-gradient-to-br from-white via-blue-100 to-pink-100 dark:from-gray-900 dark:via-blue-900 dark:to-pink-900 rounded-2xl shadow-xl p-6 border-2 border-white/40 dark:border-gray-800/40 hover:scale-110 hover:shadow-2xl transition-transform duration-200 group animate-fade-in-up"
+      style={{
+        transform: spring.val.to(val => `scale(${0.8 + 0.2 * (val / end)})`),
+      }}
+    >
+      <div className="text-4xl mb-2 group-hover:scale-125 transition-transform animate-pop-in">{stat.icon}</div>
+      <div className="flex items-center gap-2">
+        <div className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors animate-count-up">
+          {typeof stat.value === 'number' ? <animated.span>{spring.val.to(val => Math.floor(val))}</animated.span> : stat.value}
+        </div>
+        <span className={`text-xs font-semibold ${trend==='up' ? 'text-green-600' : 'text-red-600'}`}>{trendPercent} {trend==='up' ? '▲' : '▼'}</span>
+      </div>
+      <div className="text-gray-500 text-sm mt-1">{stat.label}</div>
+    </animated.div>
   );
 };
 
