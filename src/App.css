@@ -1,0 +1,28 @@
+/* App.css - default styles for your React app */
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: #4f46e5;
+  color: #fff;
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.footer {
+  background: #f3f4f6;
+  color: #6b7280;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+} 
