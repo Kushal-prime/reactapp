@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
@@ -125,31 +125,8 @@ const Updates: React.FC = () => {
             <button onClick={() => setShowCreateModal(true)} className="mt-2 px-6 py-2 bg-primary-100 text-primary-700 rounded-lg font-semibold hover:bg-primary-200 transition">Create your first update</button>
           </div>
         ) : (
-          filteredUpdates.map((update) => (
-            <div key={update.id} className="bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-3 border-l-4 border-primary-500 animate-fade-in">
-              <div className="flex items-center gap-4 mb-2">
-                <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-xl">
-                  {update.author ? update.author.charAt(0).toUpperCase() : <UserCircle className="w-8 h-8" />}
-                </div>
-                <div>
-                  <div className="font-bold text-gray-800 text-lg">{update.author || 'Unknown'}</div>
-                  <div className="text-xs text-gray-500">{new Date(update.createdAt).toLocaleDateString()} at {new Date(update.createdAt).toLocaleTimeString()}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 mb-1">
-                <FileText className="w-5 h-5 text-primary-400" />
-                <span className="font-bold text-primary-700 text-xl">{update.title}</span>
-              </div>
-              <div className="text-gray-700 text-base mb-2 whitespace-pre-line">{update.content}</div>
-              <div className="flex items-center gap-3 text-sm text-gray-500 mt-2">
-                <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full font-semibold">{getProjectName(update.projectId)}</span>
-                {update.attachments && update.attachments.length > 0 && (
-                  <span className="flex items-center gap-1">
-                    <FileText className="w-4 h-4 text-gray-400" /> {update.attachments.length} attachment{update.attachments.length > 1 ? 's' : ''}
-                  </span>
-                )}
-              </div>
-            </div>
+          filteredUpdates.map((update, idx) => (
+            <UpdateCard key={update.id} update={update} idx={idx} getProjectName={getProjectName} />
           ))
         )}
       </div>
@@ -186,6 +163,50 @@ const Updates: React.FC = () => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// Animated Update Card
+const UpdateCard: React.FC<{ update: Update; idx: number; getProjectName: (id: string) => string }> = ({ update, idx, getProjectName }) => {
+  const [show, setShow] = useState(false);
+  const [titleDisplay, setTitleDisplay] = useState('');
+  useEffect(() => {
+    const timeout = setTimeout(() => setShow(true), idx * 120);
+    return () => clearTimeout(timeout);
+  }, [idx]);
+  useEffect(() => {
+    if (show && titleDisplay.length < update.title.length) {
+      const timeout = setTimeout(() => {
+        setTitleDisplay(update.title.slice(0, titleDisplay.length + 1));
+      }, 30);
+      return () => clearTimeout(timeout);
+    }
+  }, [show, titleDisplay, update.title]);
+  return (
+    <div className={`bg-gradient-to-br from-teal-50 via-white to-blue-50 dark:from-teal-900 dark:via-gray-900 dark:to-blue-900 rounded-2xl shadow-xl p-8 flex flex-col gap-3 border-l-4 border-primary-500 transition-all duration-300 ${show ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'} hover:scale-105 hover:shadow-2xl hover:shadow-primary-200 dark:hover:shadow-primary-900`} style={{ transitionDelay: `${idx * 80}ms` }}>
+      <div className="flex items-center gap-4 mb-2">
+        <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-xl shadow-lg animate-pop-in">
+          {update.author ? update.author.charAt(0).toUpperCase() : <UserCircle className="w-8 h-8" />}
+        </div>
+        <div>
+          <div className="font-bold text-gray-800 text-lg animate-fade-in-up">{update.author || 'Unknown'}</div>
+          <div className="text-xs text-gray-500 animate-fade-in-up">{new Date(update.createdAt).toLocaleDateString()} at {new Date(update.createdAt).toLocaleTimeString()}</div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 mb-1 animate-pop-in">
+        <FileText className="w-5 h-5 text-primary-400" />
+        <span className="font-bold text-primary-700 text-xl animate-gradient-x">{titleDisplay}<span className="w-1 h-6 bg-primary-400 inline-block ml-1 align-middle animate-blink rounded" /></span>
+      </div>
+      <div className="text-gray-700 text-base mb-2 whitespace-pre-line animate-fade-in-up">{update.content}</div>
+      <div className="flex items-center gap-3 text-sm text-gray-500 mt-2 animate-fade-in-up">
+        <span className="bg-primary-50 text-primary-700 px-3 py-1 rounded-full font-semibold animate-pop-in">{getProjectName(update.projectId)}</span>
+        {update.attachments && update.attachments.length > 0 && (
+          <span className="flex items-center gap-1 animate-fade-in-up">
+            <FileText className="w-4 h-4 text-gray-400" /> {update.attachments.length} attachment{update.attachments.length > 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
     </div>
   );
 };
