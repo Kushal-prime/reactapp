@@ -169,9 +169,9 @@ const Dashboard: React.FC = () => {
             {greeting.text}, {user?.name?.split(' ')[0] || 'User'}!
           </div>
           <div className="flex gap-4 mt-2">
-            <a href="/dashboard/projects" className="px-5 py-2 bg-white bg-opacity-20 rounded-lg font-semibold shadow hover:bg-opacity-40 transition-all duration-150">Add Project</a>
-            <a href="/dashboard/tasks" className="px-5 py-2 bg-white bg-opacity-20 rounded-lg font-semibold shadow hover:bg-opacity-40 transition-all duration-150">Add Task</a>
-            <a href="/dashboard/clients" className="px-5 py-2 bg-white bg-opacity-20 rounded-lg font-semibold shadow hover:bg-opacity-40 transition-all duration-150">Add Client</a>
+            <a href="/dashboard/projects" className="px-5 py-2 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-300 text-white rounded-lg font-semibold shadow hover:from-blue-600 hover:to-blue-400 hover:scale-105 transition-all duration-150">Add Project</a>
+            <a href="/dashboard/tasks" className="px-5 py-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-300 text-white rounded-lg font-semibold shadow hover:from-yellow-500 hover:to-orange-500 hover:scale-105 transition-all duration-150">Add Task</a>
+            <a href="/dashboard/clients" className="px-5 py-2 bg-gradient-to-r from-green-500 via-green-400 to-green-300 text-white rounded-lg font-semibold shadow hover:from-green-600 hover:to-green-400 hover:scale-105 transition-all duration-150">Add Client</a>
           </div>
         </div>
       </div>
@@ -200,32 +200,28 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="text-2xl font-extrabold text-primary-600 mb-1">{section.stat}</div>
             <div className="text-gray-500 mb-4">{section.desc}</div>
-            <span className="mt-auto self-start flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold shadow hover:bg-primary-700 hover:scale-105 transition-all duration-150">
-              View All <ArrowRight className="w-4 h-4" />
-            </span>
+            <span className={`mt-auto self-start flex items-center gap-2 px-4 py-2 rounded-lg font-semibold shadow hover:scale-105 transition-all duration-150 ${section.title === 'Events' ? 'bg-blue-600 hover:bg-blue-700 text-white' : section.title === 'Tickets' ? 'bg-pink-600 hover:bg-pink-700 text-white' : section.title === 'Deliverables' ? 'bg-purple-600 hover:bg-purple-700 text-white' : section.title === 'Users' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-800'}`}>View All <ArrowRight className="w-4 h-4" /></span>
           </a>
         ))}
-        {/* Clients Section Placeholder */}
-        <a href="/dashboard/clients" className="flex flex-col bg-gradient-to-br from-green-50 via-green-100 to-green-200 rounded-2xl shadow-lg p-6 border border-gray-100 hover:scale-105 hover:shadow-xl transition-transform duration-200 group cursor-pointer">
+        {/* Clients Section Card */}
+        <a href="/dashboard/clients" className="flex flex-col bg-gradient-to-br from-green-200 via-green-300 to-green-400 dark:from-green-900 dark:via-green-800 dark:to-green-700 rounded-2xl shadow-xl p-6 border-4 border-green-300 hover:scale-105 hover:shadow-2xl hover:border-green-500 transition-transform duration-200 group cursor-pointer animate-fade-in">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl group-hover:scale-125 transition-transform">💼</span>
-            <span className="text-xl font-bold text-gray-800 group-hover:text-green-700 transition-colors">Clients</span>
+            <span className="text-xl font-bold text-green-900 dark:text-green-200 group-hover:text-green-700 transition-colors">Clients</span>
           </div>
-          <div className="text-2xl font-extrabold text-green-700 mb-1">Coming Soon</div>
-          <div className="text-gray-500 mb-4">Manage your clients and their details here.</div>
+          <div className="text-lg font-semibold text-green-800 dark:text-green-100 mb-1">Manage your clients and their details here.</div>
           <span className="mt-auto self-start flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold shadow hover:bg-green-700 hover:scale-105 transition-all duration-150">
             View All <ArrowRight className="w-4 h-4" />
           </span>
         </a>
-        {/* Tasks Section Placeholder */}
-        <a href="/dashboard/tasks" className="flex flex-col bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 rounded-2xl shadow-lg p-6 border border-gray-100 hover:scale-105 hover:shadow-xl transition-transform duration-200 group cursor-pointer">
+        {/* Tasks Section Card */}
+        <a href="/dashboard/tasks" className="flex flex-col bg-gradient-to-br from-red-100 via-red-200 to-red-300 dark:from-red-900 dark:via-red-800 dark:to-red-700 rounded-2xl shadow-xl p-6 border-4 border-red-200 hover:scale-105 hover:shadow-2xl hover:border-red-400 transition-transform duration-200 group cursor-pointer animate-fade-in">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl group-hover:scale-125 transition-transform">🗂️</span>
-            <span className="text-xl font-bold text-gray-800 group-hover:text-yellow-700 transition-colors">Tasks</span>
+            <span className="text-xl font-bold text-red-900 dark:text-red-200 group-hover:text-red-700 transition-colors">Tasks</span>
           </div>
-          <div className="text-2xl font-extrabold text-yellow-700 mb-1">Coming Soon</div>
-          <div className="text-gray-500 mb-4">Track and manage your tasks efficiently.</div>
-          <span className="mt-auto self-start flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg font-semibold shadow hover:bg-yellow-700 hover:scale-105 transition-all duration-150">
+          <div className="text-lg font-semibold text-red-800 dark:text-red-100 mb-1">Track and manage your tasks efficiently.</div>
+          <span className="mt-auto self-start flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold shadow hover:bg-red-700 hover:scale-105 transition-all duration-150">
             View All <ArrowRight className="w-4 h-4" />
           </span>
         </a>

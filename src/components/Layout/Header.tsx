@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Search, Menu } from 'lucide-react';
+import { Bell, Search, Menu, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Notification } from '../../types';
 
@@ -29,6 +29,20 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   ]);
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // Dark mode state for mobile toggle
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const toggleDark = () => {
+    setDark(d => {
+      const next = !d;
+      if (next) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      return next;
+    });
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const markAsRead = (id: string) => {
@@ -47,7 +61,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           >
             <Menu className="w-6 h-6" />
           </button>
-          
           <div className="relative ml-4">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -135,6 +148,15 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
               <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
             </div>
           </div>
+
+          {/* Mobile dark mode toggle - moved to far right */}
+          <button
+            className="ml-2 p-2 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
+            onClick={toggleDark}
+            aria-label="Toggle dark mode"
+          >
+            {dark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-700" />}
+          </button>
         </div>
       </div>
     </header>
