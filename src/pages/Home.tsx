@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { motion, useAnimation, useInView } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import Confetti from 'react-confetti';
-import Particles from 'react-tsparticles';
+import { Particles } from 'react-tsparticles';
 import { loadFull } from 'tsparticles';
-import { useCallback } from 'react';
+import type { Engine, MoveDirection, OutMode } from 'tsparticles-engine';
 import { Howl } from 'howler';
 
 const features = [
@@ -19,35 +19,6 @@ const stats = [
   { icon: '🚀', label: 'Active Projects', value: 8 },
   { icon: '💰', label: 'Total Revenue', value: '$125,000' },
   { icon: '👥', label: 'Team Members', value: 15 },
-];
-
-const recentProjects = [
-  { title: 'E-commerce Platform', client: 'TechCorp Inc.', progress: 75 },
-  { title: 'Mobile App Development', client: 'StartupXYZ', progress: 45 },
-  { title: 'Website Redesign', client: 'Creative Studio', progress: 30 },
-];
-
-const recentTasks = [
-  { title: 'Design user interface mockups', assignee: 'Sarah Johnson', status: 'Completed' },
-  { title: 'Implement authentication system', assignee: 'Mike Chen', status: 'In-Progress' },
-  { title: 'Write API documentation', assignee: 'Lisa Chen', status: 'Pending' },
-];
-
-const statusColor = (status: string) => {
-  switch (status) {
-    case 'Completed': return 'bg-green-100 text-green-700';
-    case 'In-Progress': return 'bg-blue-100 text-blue-700';
-    case 'Pending': return 'bg-yellow-100 text-yellow-700';
-    default: return 'bg-gray-100 text-gray-700';
-  }
-};
-
-const sections = [
-  { icon: '📅', title: 'Events', stat: 5, desc: 'Upcoming events and webinars', link: '/dashboard/events' },
-  { icon: '🎫', title: 'Tickets', stat: 9, desc: 'Open support tickets', link: '/dashboard/tickets' },
-  { icon: '📤', title: 'Deliverables', stat: 7, desc: 'Pending deliverables', link: '/dashboard/deliverables' },
-  { icon: '👥', title: 'Users', stat: 15, desc: 'Active team members', link: '/dashboard/users' },
-  { icon: '📝', title: 'Updates', stat: 3, desc: 'Recent announcements', link: '/dashboard/updates' },
 ];
 
 const testimonials = [
@@ -103,7 +74,6 @@ const Home: React.FC = () => {
   }, [charIndex, typeIndex]);
 
   // Animated counters for stats
-  const [animatedStats, setAnimatedStats] = useState(stats.map(() => 0));
   useEffect(() => {
     stats.forEach((stat, i) => {
       let start = 0;
@@ -112,12 +82,12 @@ const Home: React.FC = () => {
       const step = Math.ceil(end / (duration / 16));
       const interval = setInterval(() => {
         start += step;
-        setAnimatedStats(prev => {
-          const next = [...prev];
-          next[i] = start >= end ? end : start;
-          return next;
-        });
-        if (start >= end) clearInterval(interval);
+        // This state update is not directly used for animation, but for the counter effect
+        // setAnimatedStats(prev => {
+        //   const next = [...prev];
+        //   next[i] = start >= end ? end : start;
+        //   return next;
+        // });
       }, 16);
     });
   }, []);
@@ -166,7 +136,7 @@ const Home: React.FC = () => {
   };
 
   // Particle config
-  const particlesInit = useCallback(async (engine) => {
+  const particlesInit = useCallback(async (engine: Engine) => {
     await loadFull(engine);
   }, []);
   const particlesOptions = {
@@ -179,7 +149,7 @@ const Home: React.FC = () => {
     particles: {
       color: { value: ['#a78bfa', '#f472b6', '#60a5fa', '#fbbf24'] },
       links: { enable: true, color: '#a78bfa', distance: 150, opacity: 0.2, width: 1 },
-      move: { enable: true, speed: 1, direction: 'none', outModes: 'out' },
+      move: { enable: true, speed: 1, direction: 'none' as MoveDirection, outModes: { default: 'out' as OutMode } },
       number: { value: 60, density: { enable: true, area: 800 } },
       opacity: { value: 0.5 },
       shape: { type: 'circle' },

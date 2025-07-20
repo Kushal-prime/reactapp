@@ -464,7 +464,7 @@ const Dashboard: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Progress (%)</label>
-              <input type="number" name="progress" value={projectForm.progress} onChange={e => setProjectForm(f => ({ ...f, progress: e.target.value }))} min={0} max={100} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required />
+              <input type="number" name="progress" value={projectForm.progress} onChange={e => setProjectForm(f => ({ ...f, progress: Number(e.target.value) }))} min={0} max={100} className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500" required />
             </div>
             <div className="flex gap-2 mt-4">
               <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition font-bold">Add</button>
