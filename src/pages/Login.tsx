@@ -112,9 +112,9 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 via-purple-100 to-pink-100 relative overflow-hidden animate-fade-in">
       {/* Animated Gradient Blobs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-blob -z-10" style={{ animationDelay: '0s' }} />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-blob -z-10" style={{ animationDelay: '2s' }} />
-      <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob -z-10" style={{ animationDelay: '4s', transform: 'translate(-50%, -50%)' }} />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-2xl opacity-30 -z-10" style={{ animationDelay: '0s' }} />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-2xl opacity-30 -z-10" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-1/2 left-1/2 w-[600px] h-[600px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -z-10" style={{ animationDelay: '4s', transform: 'translate(-50%, -50%)' }} />
       <div className="max-w-md w-full space-y-8 z-10">
         {loading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">

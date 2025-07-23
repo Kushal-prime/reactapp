@@ -203,17 +203,18 @@ const Home: React.FC = () => {
       {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={400} />}
       {/* Hero Section */}
       <motion.div initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }} className="w-full flex flex-col items-center justify-center min-h-[70vh] pt-24 pb-12">
-        <motion.div whileHover={{ scale: 1.08, rotate: 8 }} className="backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-2xl p-10 md:p-16 flex flex-col items-center max-w-2xl border-2 border-white/40 dark:border-gray-800/40 animate-fade-in">
-          <motion.div
-            animate={{ y: [0, -20, 0], rotateX: emojiTilt.y, rotateY: emojiTilt.x }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="text-7xl mb-6 cursor-pointer select-none"
-            onMouseMove={handleEmojiMove}
-            onMouseLeave={handleEmojiLeave}
-            onClick={handleEmojiClick}
-          >
-            {wink ? '😉' : '🚀'}
-          </motion.div>
+      <motion.div whileHover={{ scale: 1.08 }} className="backdrop-blur-xl bg-white/40 dark:bg-gray-900/40 rounded-3xl shadow-2xl p-10 md:p-16 flex flex-col items-center max-w-2xl border-2 border-white/40 dark:border-gray-800/40 animate-fade-in">
+        <motion.div
+          // Removed rotation animation
+          // animate={{ y: [0, -20, 0], rotateX: emojiTilt.y, rotateY: emojiTilt.x }}
+          // transition={{ repeat: Infinity, duration: 2 }}
+          className="text-7xl mb-6 cursor-pointer select-none"
+          onMouseMove={handleEmojiMove}
+          onMouseLeave={handleEmojiLeave}
+          onClick={handleEmojiClick}
+        >
+          {wink ? '😉' : '🚀'}
+        </motion.div>
           <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 text-center drop-shadow-lg flex items-center gap-3 animate-gradient-x min-h-[56px]">
             {displayed}
             <span className="w-2 h-8 bg-pink-500 animate-blink inline-block ml-1 align-middle rounded" />
@@ -222,10 +223,10 @@ const Home: React.FC = () => {
           <p className="text-lg text-gray-700 dark:text-gray-200 mb-10 text-center max-w-2xl">Sign in to manage your projects, team, and tasks in one place. Experience seamless collaboration, real-time updates, and powerful analytics—all in a beautiful, modern interface.</p>
           <div className="flex flex-col sm:flex-row gap-6 mb-4 w-full justify-center">
             <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.07, boxShadow: '0 0 24px #a78bfa' }}>
-              <Link to="/login" onClick={handleButtonClick} className="px-10 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-2xl font-bold shadow-xl hover:from-blue-700 hover:to-pink-700 hover:scale-105 transition text-2xl w-full sm:w-auto text-center">Log In</Link>
+              <Link to="/login" onClick={handleButtonClick} className="px-10 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-2xl font-bold shadow-xl hover:from-blue-700 hover:to-pink-700 hover:scale-105 transition text-2xl w-full sm:w-auto text-center cursor-pointer">Log In</Link>
             </motion.div>
             <motion.div whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.07, boxShadow: '0 0 24px #a78bfa' }}>
-              <Link to="/login" className="px-10 py-4 bg-white/80 border-2 border-primary-600 text-primary-600 rounded-2xl font-bold shadow-xl hover:bg-primary-50 hover:scale-105 transition text-2xl w-full sm:w-auto text-center">Sign Up</Link>
+              <Link to="/login" className="px-10 py-4 bg-white/80 border-2 border-primary-600 text-primary-600 rounded-2xl font-bold shadow-xl hover:bg-primary-50 hover:scale-105 transition text-2xl w-full sm:w-auto text-center cursor-pointer">Sign Up</Link>
             </motion.div>
           </div>
         </motion.div>
